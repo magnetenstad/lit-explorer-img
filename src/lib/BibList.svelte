@@ -6,7 +6,7 @@
   let bib: Library | null = null;
 
   onMount(async () => {
-    const response = await fetch('/references.bib');
+    const response = await fetch('/survis2/references.bib');
     const file = await response.text();
     bib = parse(file);
   });
@@ -40,12 +40,7 @@
     border-radius: 6px;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h4 {
     margin: 0;
   }
 </style>
