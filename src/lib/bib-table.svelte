@@ -19,6 +19,7 @@
     addTableFilter,
   } from 'svelte-headless-table/plugins'
   import { writable } from 'svelte/store'
+  import { parseKeywords } from './bib'
   import BibTableActions from './bib-table-actions.svelte'
   import { Button } from './components/ui/button'
 
@@ -31,14 +32,6 @@
     bib = parse(file)
     tableData.set(bib.entries)
   })
-
-  const parseKeywords = (keywords: string[]) => {
-    return keywords.map((kvPair) => {
-      if (!kvPair.includes(':')) return { key: kvPair, value: kvPair }
-      const [key, value] = kvPair.split(':')
-      return { key, value }
-    })
-  }
 
   const keywordsToCategoryString = (
     keywords: { key: string; value: string }[]
