@@ -1,18 +1,18 @@
 <script lang="ts">
-  import type { Library } from '@retorquere/bibtex-parser';
-  import { parse } from '@retorquere/bibtex-parser';
-  import { onMount } from 'svelte';
+  import type { Library } from '@retorquere/bibtex-parser'
+  import { parse } from '@retorquere/bibtex-parser'
+  import { onMount } from 'svelte'
 
-  let bib: Library | null = null;
+  let bib: Library | null = null
 
   onMount(async () => {
-    const response = await fetch('/survis2/references.bib');
-    const file = await response.text();
-    bib = parse(file);
-  });
+    const response = await fetch('/survis2/references.bib')
+    const file = await response.text()
+    bib = parse(file)
+  })
 </script>
 
-<div style="display: flex; flex-direction: column;">
+<div class="col">
   {#if bib}
     <h4>{bib.entries.length} Publications</h4>
     {#each bib.entries as entry}
