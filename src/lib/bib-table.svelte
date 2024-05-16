@@ -32,6 +32,26 @@
     tableData.set(bib.entries)
   })
 
+  const parseKeywords = (keywords: string[]) => {
+    return keywords.map((kvPair) => {
+      if (!kvPair.includes(':')) return { key: kvPair, value: kvPair }
+      const [key, value] = kvPair.split(':')
+      return { key, value }
+    })
+  }
+
+  const keywordsToCategoryString = (
+    keywords: { key: string; value: string }[]
+  ) => {
+    const categories = keywords.filter(
+      (keyword) => keyword.key.toLowerCase() == 'category'
+    )
+    return categories.reduce(
+      (prev: string, curr) => prev + (prev.length ? ', ' : '') + curr.value,
+      ''
+    )
+  }
+
   const table = createTable(tableData, {
     sort: addSortBy(),
     filter: addTableFilter({
@@ -64,6 +84,11 @@
     table.column({
       accessor: (entry) => entry.fields.date ?? '',
       header: 'Date',
+    }),
+    table.column({
+      accessor: (entry) =>
+        keywordsToCategoryString(parseKeywords(entry.fields.keywords ?? [])),
+      header: 'Categories',
     }),
     table.column({
       accessor: (entry) => entry.fields.doi ?? '',
@@ -106,7 +131,7 @@
     .filter(([, hide]) => !hide)
     .map(([id]) => id)
 
-  const hidableCols = ['Author', 'Date', 'Doi']
+  const hidableCols = ['Author', 'Date', 'Categories', 'Doi']
 </script>
 
 <div>
