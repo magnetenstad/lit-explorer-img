@@ -8,6 +8,7 @@
     timelineEntries,
   } from '$lib/bib-store'
   import BibTable from '$lib/bib-table.svelte'
+  import * as Resizable from '$lib/components/ui/resizable'
   import { Toaster } from '$lib/components/ui/sonner'
   import SetVis from '$lib/set-vis.svelte'
   import Timeline from '$lib/timeline.svelte'
@@ -52,37 +53,42 @@
 <main>
   <Toaster />
   {#if bib}
-    <div class="flex gap-[1em] mx-[1em]">
-      <div class="flex flex-col flex-1 max-h-[100svh] overflow-auto">
-        <div class="flex justify-between items-end">
+    <Resizable.PaneGroup direction="horizontal" class="h-[100svh]">
+      <Resizable.Pane>
+        <div class="flex flex-col flex-1 max-h-[100svh] overflow-auto px-4">
+          <div class="flex justify-between items-end">
+            <div class="prose m-3">
+              <h2>SurVis2</h2>
+            </div>
+          </div>
           <div class="prose m-3">
-            <h2>SurVis2</h2>
+            <h3>Timeline</h3>
+          </div>
+          <Timeline bibEntries={unwrappedTimelineEntries}></Timeline>
+          <div class="prose m-3">
+            <h3>Categories</h3>
+          </div>
+          <div class="flex-1">
+            <SetVis
+              allBibEntries={unwrappedAllEntries}
+              filteredBibEntries={unwrappedSetVisEntries}
+            ></SetVis>
+          </div>
+          <div class="prose m-3">
+            <h3>Authors</h3>
+          </div>
+          <div class="flex-1">
+            <Authors bibEntries={unwrappedAuthorEntries}></Authors>
           </div>
         </div>
-        <div class="prose m-3">
-          <h3>Timeline</h3>
+      </Resizable.Pane>
+      <Resizable.Handle />
+      <Resizable.Pane>
+        <div class="px-4">
+          <BibTable bibEntries={dataTableEntries}></BibTable>
         </div>
-        <Timeline bibEntries={unwrappedTimelineEntries}></Timeline>
-        <div class="prose m-3">
-          <h3>Categories</h3>
-        </div>
-        <div class="flex-1">
-          <SetVis
-            allBibEntries={unwrappedAllEntries}
-            filteredBibEntries={unwrappedSetVisEntries}
-          ></SetVis>
-        </div>
-        <div class="prose m-3">
-          <h3>Authors</h3>
-        </div>
-        <div class="flex-1">
-          <Authors bibEntries={unwrappedAuthorEntries}></Authors>
-        </div>
-      </div>
-      <div class="flex-1">
-        <BibTable bibEntries={dataTableEntries}></BibTable>
-      </div>
-    </div>
+      </Resizable.Pane>
+    </Resizable.PaneGroup>
   {/if}
 </main>
 
