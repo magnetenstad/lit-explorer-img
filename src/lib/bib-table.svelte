@@ -2,7 +2,7 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu'
   import { Input } from '$lib/components/ui/input'
   import * as Table from '$lib/components/ui/table'
-  import type { Entry, Library } from '@retorquere/bibtex-parser'
+  import type { Creator, Entry, Library } from '@retorquere/bibtex-parser'
   import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down'
   import ChevronDown from 'lucide-svelte/icons/chevron-down'
   import {
@@ -36,6 +36,19 @@
     )
   }
 
+  const authorsToString = (authors: Creator[]) => {
+    if (authors.length == 0) {
+      return 'Unknown'
+    }
+    if (authors.length == 1) {
+      return `${authors[0].firstName} ${authors[0].lastName}`
+    }
+    if (authors.length == 2) {
+      return `${authors[0].firstName} ${authors[0].lastName} and ${authors[1].firstName} ${authors[1].lastName}`
+    }
+    return `${authors[0].firstName} ${authors[0].lastName} et al.`
+  }
+
   const table = createTable(tableData, {
     sort: addSortBy(),
     filter: addTableFilter({
@@ -46,12 +59,7 @@
   })
   const columns = table.createColumns([
     table.column({
-      accessor: (entry) =>
-        entry.fields.author?.reduce(
-          (prev: string, curr) =>
-            prev + (prev.length ? ', ' : '') + curr.lastName,
-          ''
-        ),
+      accessor: (entry) => authorsToString(entry.fields.author ?? []),
       header: 'Author',
       plugins: {
         sort: {
