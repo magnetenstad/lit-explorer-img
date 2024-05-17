@@ -194,6 +194,7 @@
         on:click={() => {
           selectedSets.clear()
           setVisFilter.set(new Set())
+          selectedSets = selectedSets
         }}>Clear</Button
       >
     </div>
