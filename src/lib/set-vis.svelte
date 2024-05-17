@@ -19,8 +19,8 @@
 
   onMount(async () => {
     const options = {
-      width: 1200,
-      height: 800,
+      width: 1600,
+      height: 750,
       scale: 0.6,
       fps: 60,
     }
@@ -44,9 +44,13 @@
         })
     })
 
-    const bibSets = [...categories].map((category) =>
-      new BibSet(0, 0, category).activate(game)
-    )
+    let target = new Vec2(0, 0)
+    const bibSets = [...categories].map((category) => {
+      target = target
+        .plus(new Vec2(200 * Math.max(1, Math.sign(target.x)), 0))
+        .multiply(-1)
+      return new BibSet(0, 0, category, target).activate(game)
+    })
     const bibNodes: BibNode[] = []
     const connections: [BibNode, BibNode][] = []
     const selectedSets = new Set<BibSet>()

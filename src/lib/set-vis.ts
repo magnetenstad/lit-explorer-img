@@ -87,10 +87,12 @@ export class BibSet extends PositionObject {
   title: string
   highlight = HightlightState.None
   __zIndex = 1
+  target: Vec2
 
-  constructor(x: number, y: number, title: string) {
+  constructor(x: number, y: number, title: string, target: Vec2) {
     super(x, y)
     this.title = title
+    this.target = target
   }
 
   step(ctx: GameContext): void {
@@ -116,9 +118,8 @@ export class BibSet extends PositionObject {
       )
     })
 
-    const center = new Vec2(0, 0)
-    const l = Math.max(this.pos.lengthTo(center), 1)
-    this.pos = this.pos.moveTowards(center, l / 100)
+    const l = Math.max(this.pos.lengthTo(this.target), 1)
+    this.pos = this.pos.moveTowards(this.target, l / 100)
 
     this.speed = this.speed
       .multiply(0.9)

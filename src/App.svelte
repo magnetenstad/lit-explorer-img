@@ -3,6 +3,7 @@
   import BibTable from '$lib/bib-table.svelte'
   import { Toaster } from '$lib/components/ui/sonner'
   import SetVis from '$lib/set-vis.svelte'
+  import Timeline from '$lib/timeline.svelte'
   import type { Library } from '@retorquere/bibtex-parser'
   import { parse } from '@retorquere/bibtex-parser'
   import { onMount } from 'svelte'
@@ -24,9 +25,10 @@
         <div class="prose m-3">
           <h2>SurVis2</h2>
         </div>
-        <!-- <div class="prose m-3">
+        <div class="prose m-3">
           <h3>Timeline</h3>
-        </div> -->
+        </div>
+        <Timeline {bib}></Timeline>
         <div class="prose m-3">
           <h3>Categories</h3>
         </div>
