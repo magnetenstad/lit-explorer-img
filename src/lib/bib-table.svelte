@@ -1,4 +1,5 @@
 <script lang="ts">
+  import * as Dialog from '$lib/components/ui/dialog'
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu'
   import { Input } from '$lib/components/ui/input'
   import * as Table from '$lib/components/ui/table'
@@ -18,6 +19,7 @@
     addSortBy,
     addTableFilter,
   } from 'svelte-headless-table/plugins'
+  import { toast } from 'svelte-sonner'
   import { type Readable } from 'svelte/store'
   import { parseKeywords } from './bib'
   import BibTableActions from './bib-table-actions.svelte'
@@ -54,6 +56,21 @@
       return `${authors[0].firstName} ${authors[0].lastName} and ${authors[1].firstName} ${authors[1].lastName}`
     }
     return `${authors[0].firstName} ${authors[0].lastName} et al.`
+  }
+
+  const authorsToStringVerbose = (authors: Creator[]) => {
+    if (authors.length == 0) {
+      return 'Unknown'
+    }
+    return (
+      authors.reduce(
+        (prev: string, curr) =>
+          prev +
+          (prev.length ? ' and ' : '') +
+          `${curr.firstName ?? ''} ${curr.lastName ?? ''}`,
+        ''
+      ) + '.'
+    )
   }
 
   const table = createTable(bibEntries, {
@@ -150,98 +167,162 @@
   let numEntries = 0
   const unsubscribe = bibEntries.subscribe((e) => (numEntries = e.length))
   onDestroy(unsubscribe)
+
+  let hoverEntry: Entry | undefined = undefined
 </script>
 
 <Tabs.Root value="table">
-  <div class="flex justify-between gap-4 items-center py-4">
-    <Input
-      class="max-w-sm"
-      placeholder={`Search in ${numEntries} publications`}
-      type="text"
-      bind:value={$filterValue}
-    />
-    <Tabs.List>
-      <Tabs.Trigger value="table">Table</Tabs.Trigger>
-      <Tabs.Trigger value="image-grid">Image Grid</Tabs.Trigger>
-    </Tabs.List>
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild let:builder>
-        <Button variant="outline" class="ml-auto" builders={[builder]}>
-          Columns <ChevronDown class="ml-2 h-4 w-4" />
-        </Button>
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Content>
-        {#each flatColumns as col}
-          {#if hidableCols.includes(col.id)}
-            <DropdownMenu.CheckboxItem bind:checked={hideForId[col.id]}>
-              {col.header}
-            </DropdownMenu.CheckboxItem>
-          {/if}
-        {/each}
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
-  </div>
-
-  <Tabs.Content value="table">
-    <ScrollArea class="h-[90svh] rounded-md border">
-      <Table.Root {...$tableAttrs}>
-        <Table.Header>
-          {#each $headerRows as headerRow}
-            <Subscribe rowAttrs={headerRow.attrs()}>
-              <Table.Row>
-                {#each headerRow.cells as cell (cell.id)}
-                  <Subscribe
-                    attrs={cell.attrs()}
-                    let:attrs
-                    props={cell.props()}
-                    let:props
-                  >
-                    <Table.Head {...attrs}>
-                      {#if ['Author', 'Title', 'Date'].includes(cell.id)}
-                        <Button variant="ghost" on:click={props.sort.toggle}>
-                          <Render of={cell.render()} />
-                          <ArrowUpDown class={'ml-2 h-4 w-4'} />
-                        </Button>
-                      {:else}
-                        <Render of={cell.render()} />
-                      {/if}
-                    </Table.Head>
-                  </Subscribe>
-                {/each}
-              </Table.Row>
-            </Subscribe>
+  <Dialog.Root>
+    <div class="flex justify-between gap-4 items-center py-4">
+      <Input
+        class="max-w-sm"
+        placeholder={`Search in ${numEntries} publications`}
+        type="text"
+        bind:value={$filterValue}
+      />
+      <Tabs.List>
+        <Tabs.Trigger value="table">Table</Tabs.Trigger>
+        <Tabs.Trigger value="image-grid">Image Grid</Tabs.Trigger>
+      </Tabs.List>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild let:builder>
+          <Button variant="outline" class="ml-auto" builders={[builder]}>
+            Columns <ChevronDown class="ml-2 h-4 w-4" />
+          </Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content>
+          {#each flatColumns as col}
+            {#if hidableCols.includes(col.id)}
+              <DropdownMenu.CheckboxItem bind:checked={hideForId[col.id]}>
+                {col.header}
+              </DropdownMenu.CheckboxItem>
+            {/if}
           {/each}
-        </Table.Header>
-        <Table.Body {...$tableBodyAttrs}>
-          {#each $pageRows as row (row.id)}
-            <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-              <Table.Row {...rowAttrs}>
-                {#each row.cells as cell (cell.id)}
-                  <Subscribe attrs={cell.attrs()} let:attrs>
-                    <Table.Cell {...attrs}>
-                      <Render of={cell.render()} />
-                    </Table.Cell>
-                  </Subscribe>
-                {/each}
-              </Table.Row>
-            </Subscribe>
-          {/each}
-        </Table.Body>
-      </Table.Root>
-    </ScrollArea>
-  </Tabs.Content>
-
-  <Tabs.Content value="image-grid">
-    <div class="flex flex-wrap gap-2">
-      {#each unwrappedBibEntries as entry}
-        <div>
-          <BibTableImg
-            className="cursor-pointer hover:shadow-lg rounded-md border"
-            bibKey={entry.key}
-            width="140px"
-          ></BibTableImg>
-        </div>
-      {/each}
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
     </div>
-  </Tabs.Content>
+
+    <Tabs.Content value="table">
+      <ScrollArea class="h-[90svh] rounded-md border">
+        <Table.Root {...$tableAttrs}>
+          <Table.Header>
+            {#each $headerRows as headerRow}
+              <Subscribe rowAttrs={headerRow.attrs()}>
+                <Table.Row>
+                  {#each headerRow.cells as cell (cell.id)}
+                    <Subscribe
+                      attrs={cell.attrs()}
+                      let:attrs
+                      props={cell.props()}
+                      let:props
+                    >
+                      <Table.Head {...attrs}>
+                        {#if ['Author', 'Title', 'Date', 'Categories'].includes(cell.id)}
+                          <Button variant="ghost" on:click={props.sort.toggle}>
+                            <Render of={cell.render()} />
+                            <ArrowUpDown class={'ml-2 h-4 w-4'} />
+                          </Button>
+                        {:else}
+                          <Render of={cell.render()} />
+                        {/if}
+                      </Table.Head>
+                    </Subscribe>
+                  {/each}
+                </Table.Row>
+              </Subscribe>
+            {/each}
+          </Table.Header>
+          <Table.Body {...$tableBodyAttrs}>
+            {#each $pageRows as row (row.id)}
+              <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+                <Table.Row
+                  {...rowAttrs}
+                  on:click={() => {
+                    hoverEntry = unwrappedBibEntries.at(parseInt(row.id))
+                  }}
+                >
+                  {#each row.cells as cell (cell.id)}
+                    <Subscribe attrs={cell.attrs()} let:attrs>
+                      <Table.Cell {...attrs}>
+                        {#if ['Image', 'Title'].includes(cell.id)}
+                          <Dialog.Trigger>
+                            <Render of={cell.render()} />
+                          </Dialog.Trigger>
+                        {:else}
+                          <Render of={cell.render()} />
+                        {/if}
+                      </Table.Cell>
+                    </Subscribe>
+                  {/each}
+                </Table.Row>
+              </Subscribe>
+            {/each}
+          </Table.Body>
+        </Table.Root>
+      </ScrollArea>
+    </Tabs.Content>
+
+    <Tabs.Content value="image-grid">
+      <div class="flex flex-wrap gap-2 max-h-[90svh] overflow-auto">
+        {#each unwrappedBibEntries as entry}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div on:mouseenter={() => (hoverEntry = entry)}>
+            <Dialog.Trigger>
+              <BibTableImg
+                className="cursor-pointer hover:shadow-lg rounded-md border"
+                bibKey={entry.key}
+                width="140px"
+              ></BibTableImg>
+            </Dialog.Trigger>
+          </div>
+        {/each}
+      </div>
+    </Tabs.Content>
+
+    {#if hoverEntry}
+      <Dialog.Content class="max-w-[800px]">
+        <Dialog.Header>
+          <Dialog.Title>{hoverEntry.fields.title}</Dialog.Title>
+          <Dialog.Description
+            >{authorsToStringVerbose(
+              hoverEntry.fields.author ?? []
+            )}</Dialog.Description
+          >
+        </Dialog.Header>
+        <div class="prose min-w-[100%]">
+          <BibTableImg
+            bibKey={hoverEntry.key}
+            className="rounded-md border float-right"
+            width="300px"
+          ></BibTableImg>
+          <p>{hoverEntry.fields.date ?? ''}</p>
+          <p>
+            {hoverEntry.fields.abstract ?? ''}
+          </p>
+          <p>
+            {keywordsToCategoryString(
+              parseKeywords(hoverEntry.fields.keywords ?? [])
+            )}
+          </p>
+        </div>
+        <Dialog.Footer>
+          <Button
+            on:click={() => {
+              if (!hoverEntry?.fields.doi?.length) return
+              window.location.href = `https://doi.org/${hoverEntry.fields.doi}`
+            }}>Visit Page</Button
+          >
+          <Button
+            on:click={() => {
+              if (!hoverEntry) return
+              navigator.clipboard.writeText(hoverEntry.input)
+              toast.success('BibTex has been copied', {
+                description: hoverEntry.fields.title,
+              })
+            }}>Copy BibText</Button
+          >
+        </Dialog.Footer>
+      </Dialog.Content>
+    {/if}
+  </Dialog.Root>
 </Tabs.Root>

@@ -55,7 +55,7 @@
   {#if bib}
     <Resizable.PaneGroup direction="horizontal" class="h-[100svh]">
       <Resizable.Pane>
-        <div class="flex flex-col flex-1 max-h-[100svh] overflow-auto px-4">
+        <div class="flex flex-col max-h-[100svh] overflow-auto px-4">
           <div class="flex justify-between items-end">
             <div class="prose m-3">
               <h2>SurVis2</h2>
