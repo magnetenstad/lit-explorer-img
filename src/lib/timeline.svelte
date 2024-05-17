@@ -82,6 +82,11 @@
           class="bg-slate-200 absolute bottom-0"
           style={`height: ${(100 * entries) / maxEntriesPerYear}px; width: 100%; background-color: ${yearColors.get(year)}`}
         ></div>
+        {#if year == hoverYear}
+          <div class="absolute top-0 left-0">
+            <span>{year}</span>
+          </div>
+        {/if}
       </button>
     {/each}
   </div>
