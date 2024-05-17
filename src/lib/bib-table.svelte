@@ -83,15 +83,15 @@
         keywordsToCategoryString(parseKeywords(entry.fields.keywords ?? [])),
       header: 'Categories',
     }),
-    table.column({
-      accessor: (entry) => entry.fields.doi ?? '',
-      header: 'Doi',
-      plugins: {
-        sort: {
-          disable: true,
-        },
-      },
-    }),
+    // table.column({
+    //   accessor: (entry) => entry.fields.doi ?? '',
+    //   header: 'Doi',
+    //   plugins: {
+    //     sort: {
+    //       disable: true,
+    //     },
+    //   },
+    // }),
     table.column({
       accessor: (fields) => fields,
       header: '',
