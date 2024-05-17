@@ -1,5 +1,6 @@
 <script lang="ts">
   import { type Library } from '@retorquere/bibtex-parser'
+  import { red500, slate200, slate400 } from './colors'
 
   export let bib: Library
 
@@ -42,12 +43,12 @@
   ) => {
     const getColor = (year: number) => {
       if (selectedYears.has(year)) {
-        return 'red'
+        return red500
       }
       if (year == hoverYear) {
-        return 'gray'
+        return slate400
       }
-      return 'undefined'
+      return slate200
     }
     const yearColors = new Map<number, string>()
     years.forEach(([year, _]) => {
@@ -79,7 +80,7 @@
         on:click={() => toggleYear(year)}
       >
         <div
-          class="bg-slate-200 absolute bottom-0"
+          class="absolute bottom-0"
           style={`height: ${(100 * entries) / maxEntriesPerYear}px; width: 100%; background-color: ${yearColors.get(year)}`}
         ></div>
         {#if year == hoverYear}

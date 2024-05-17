@@ -4,6 +4,7 @@ import {
   type DrawContext,
   type GameContext,
 } from 'web-game-engine'
+import { red500, slate200, slate400 } from './colors'
 
 export enum HightlightState {
   None,
@@ -63,11 +64,11 @@ export class BibNode extends PositionObject {
   getColor() {
     switch (this.highlight) {
       case HightlightState.None:
-        return 'white'
+        return slate200
       case HightlightState.Hover:
-        return 'gray'
+        return slate400
       case HightlightState.Selected:
-        return 'red'
+        return red500
     }
   }
 
