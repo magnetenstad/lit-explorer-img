@@ -1,30 +1,31 @@
 <script lang="ts">
-  import { parse } from '@retorquere/bibtex-parser'
+  import { type Library } from '@retorquere/bibtex-parser'
   import { onMount } from 'svelte'
   import {
     Camera,
     Game,
+    MouseButton,
     PositionObject,
     TextObject,
     Vec2,
   } from 'web-game-engine'
   import { parseKeywords } from './bib'
-  import { BibNode, BibSet } from './set-vis'
+  import { BibNode, BibSet, HightlightState } from './set-vis'
+
+  let gameDiv: HTMLDivElement
+  export let bib: Library
+
+  class Center extends PositionObject {}
 
   onMount(async () => {
-    const response = await fetch('/survis2/references.bib')
-    const file = await response.text()
-    const bib = parse(file)
-
-    const gameDiv = document.querySelector('#set-vis')
     const options = {
       width: 1200,
       height: 800,
-      scale: 1,
+      scale: 0.6,
       fps: 60,
     }
     const game = new Game(gameDiv).setOptions(options)
-    const center = new PositionObject(0, 0).activate(game)
+    const center = new Center(0, 0).activate(game)
     game.canvas.camera = new Camera(
       new Vec2(options.width, options.height)
     ).setTarget(center)
@@ -42,11 +43,56 @@
           categories.add(kv.value)
         })
     })
+
     const bibSets = [...categories].map((category) =>
       new BibSet(0, 0, category).activate(game)
     )
-    const bibNodes = []
+    const bibNodes: BibNode[] = []
     const connections: [BibNode, BibNode][] = []
+    const selectedSets = new Set<BibSet>()
+    const selectedNodes = new Set<BibNode>()
+    let hoverNode: BibNode | null = null
+    let hoverSet: BibSet | null = null
+
+    const selectNode = (node: BibNode) => {
+      selectedNodes.add(node)
+      connections.forEach(([a, b]) => {
+        if (a == node || b == node) {
+          selectedNodes.add(a)
+          selectedNodes.add(b)
+        }
+      })
+    }
+    const unselectNode = (node: BibNode) => {
+      selectedNodes.delete(node)
+      connections.forEach(([a, b]) => {
+        if (a == node || b == node) {
+          selectedNodes.delete(a)
+          selectedNodes.delete(b)
+        }
+      })
+    }
+
+    center.onMousePress = (ev) => {
+      if (ev.button == MouseButton.Left && hoverSet) {
+        if (selectedSets.has(hoverSet)) {
+          selectedSets.delete(hoverSet)
+          hoverSet.nodes.forEach((node) => unselectNode(node))
+        } else {
+          selectedSets.add(hoverSet)
+          hoverSet.nodes.forEach((node) => selectNode(node))
+        }
+      }
+
+      if (ev.button == MouseButton.Left && hoverNode) {
+        if (selectedNodes.has(hoverNode)) {
+          unselectNode(hoverNode)
+        } else {
+          selectNode(hoverNode)
+        }
+      }
+    }
+
     bib.entries.forEach((entry) => {
       let prevNode: BibNode | null = null
       parseKeywords(entry.fields.keywords ?? [])
@@ -79,10 +125,79 @@
       })
     }
 
+    const highlightNode = (node: BibNode, state: HightlightState) => {
+      node.highlight = state
+
+      connections.forEach(([a, b]) => {
+        if (a == node || b == node) {
+          a.highlight = state
+          b.highlight = state
+        }
+      })
+    }
+
+    game.afterStep = (ctx) => {
+      const mouse = ctx.input.mouse.worldPos
+      hoverNode = null
+      hoverSet = null
+      bibNodes.forEach((node) => (node.highlight = HightlightState.None))
+      bibSets.forEach((set) => (set.highlight = HightlightState.None))
+      selectedNodes.forEach((node) => {
+        highlightNode(node, HightlightState.Selected)
+      })
+
+      if (bibNodes.length) {
+        let minNode = bibNodes[0]
+        let minDistance = minNode.pos.lengthTo(mouse)
+        bibNodes.forEach((node) => {
+          const distance = node.pos.lengthTo(mouse)
+          if (distance < minDistance) {
+            minDistance = distance
+            minNode = node
+          }
+        })
+
+        if (minDistance < minNode.radius + 4) {
+          hoverNode = minNode
+        }
+      }
+
+      if (hoverNode) {
+        highlightNode(hoverNode, HightlightState.Hover)
+      }
+
+      if (!hoverNode && bibSets.length) {
+        let minSet = bibSets[0]
+        let minDistance = minSet.pos.lengthTo(mouse)
+        bibSets.forEach((node) => {
+          const distance = node.pos.lengthTo(mouse)
+          if (distance < minDistance) {
+            minDistance = distance
+            minSet = node
+          }
+        })
+
+        if (minDistance < minSet.radius + 4) {
+          hoverSet = minSet
+        }
+      }
+
+      if (hoverSet) {
+        hoverSet.highlight = HightlightState.Hover
+        hoverSet.nodes.forEach((node) =>
+          highlightNode(node, HightlightState.Hover)
+        )
+      }
+
+      selectedSets.forEach((set) => {
+        set.highlight = HightlightState.Selected
+      })
+    }
+
     game.play()
   })
 </script>
 
 <div style="display: flex; justify-content: center;">
-  <div id="set-vis"></div>
+  <div bind:this={gameDiv}></div>
 </div>

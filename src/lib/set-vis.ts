@@ -5,9 +5,28 @@ import {
   type GameContext,
 } from 'web-game-engine'
 
+export enum HightlightState {
+  None,
+  Hover,
+  Selected,
+}
+
+const hightlightStateColor = (state: HightlightState) => {
+  switch (state) {
+    case HightlightState.None:
+      return 'transparent'
+    case HightlightState.Hover:
+      return 'gray'
+    case HightlightState.Selected:
+      return 'red'
+  }
+}
+
 export class BibNode extends PositionObject {
   bibSet: BibSet
   speed = new Vec2(0, 0)
+  highlight = HightlightState.None
+  radius = 10
 
   constructor(x: number, y: number, bibSet: BibSet) {
     super(x, y)
@@ -41,9 +60,20 @@ export class BibNode extends PositionObject {
     this.pos = this.pos.plus(this.speed)
   }
 
+  getColor() {
+    switch (this.highlight) {
+      case HightlightState.None:
+        return 'white'
+      case HightlightState.Hover:
+        return 'gray'
+      case HightlightState.Selected:
+        return 'red'
+    }
+  }
+
   draw(ctx: DrawContext): void {
-    ctx.canvas.drawCircle(10, this.pos, {
-      fillStyle: 'white',
+    ctx.canvas.drawCircle(this.radius, this.pos, {
+      fillStyle: this.getColor(),
       strokeStyle: 'black',
     })
   }
@@ -55,6 +85,7 @@ export class BibSet extends PositionObject {
   radius = bibsetMinRadius
   speed = new Vec2(0, 0)
   title: string
+  highlight = HightlightState.None
   __zIndex = 1
 
   constructor(x: number, y: number, title: string) {
@@ -100,10 +131,22 @@ export class BibSet extends PositionObject {
     })
   }
 
+  getLineWidth() {
+    switch (this.highlight) {
+      case HightlightState.None:
+        return 1
+      case HightlightState.Hover:
+        return 2
+      case HightlightState.Selected:
+        return 3
+    }
+  }
+
   draw(ctx: DrawContext): void {
     ctx.canvas.drawCircle(this.radius, this.pos, {
       fillStyle: 'transparent',
       strokeStyle: 'black',
+      lineWidth: this.getLineWidth(),
     })
     const pos = this.pos
       .moveTowards(new Vec2(0, 0), -(this.radius + 40))

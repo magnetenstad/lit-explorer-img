@@ -3,10 +3,8 @@
   import { Input } from '$lib/components/ui/input'
   import * as Table from '$lib/components/ui/table'
   import type { Entry, Library } from '@retorquere/bibtex-parser'
-  import { parse } from '@retorquere/bibtex-parser'
   import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down'
   import ChevronDown from 'lucide-svelte/icons/chevron-down'
-  import { onMount } from 'svelte'
   import {
     Render,
     Subscribe,
@@ -23,15 +21,8 @@
   import BibTableActions from './bib-table-actions.svelte'
   import { Button } from './components/ui/button'
 
-  let bib: Library | null = null
-  const tableData = writable<Entry[]>([])
-
-  onMount(async () => {
-    const response = await fetch('/survis2/references.bib')
-    const file = await response.text()
-    bib = parse(file)
-    tableData.set(bib.entries)
-  })
+  export let bib: Library
+  const tableData = writable<Entry[]>(bib.entries)
 
   const keywordsToCategoryString = (
     keywords: { key: string; value: string }[]
