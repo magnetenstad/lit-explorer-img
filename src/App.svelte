@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Authors from '$lib/authors.svelte'
   import BibTable from '$lib/bib-table.svelte'
   import { Toaster } from '$lib/components/ui/sonner'
   import SetVis from '$lib/set-vis.svelte'
@@ -19,13 +20,29 @@
   <Toaster />
   {#if bib}
     <div class="flex gap-[1em] mx-[1em]">
-      <div>
+      <div class="flex flex-col flex-1 max-h-[100svh] overflow-auto">
         <div class="prose m-3">
           <h2>SurVis2</h2>
         </div>
-        <SetVis {bib}></SetVis>
+        <!-- <div class="prose m-3">
+          <h3>Timeline</h3>
+        </div> -->
+        <div class="prose m-3">
+          <h3>Categories</h3>
+        </div>
+        <div class="flex-1">
+          <SetVis {bib}></SetVis>
+        </div>
+        <div class="prose m-3">
+          <h3>Authors</h3>
+        </div>
+        <div class="flex-1">
+          <Authors {bib}></Authors>
+        </div>
       </div>
-      <BibTable {bib}></BibTable>
+      <div class="flex-1">
+        <BibTable {bib}></BibTable>
+      </div>
     </div>
   {/if}
 </main>
