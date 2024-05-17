@@ -63,7 +63,7 @@
 </script>
 
 <div>
-  <div class="flex flex-row border items-stretch relative">
+  <div class="flex flex-row rounded-md border items-stretch relative">
     <div class="absolute top-0 left-0">
       <span>{years.at(0)?.at(0)}</span>
     </div>
@@ -81,10 +81,10 @@
       >
         <div
           class="absolute bottom-0"
-          style={`height: ${(100 * entries) / maxEntriesPerYear}px; width: 100%; background-color: ${yearColors.get(year)}`}
+          style={`height: ${(100 * entries) / maxEntriesPerYear}px; width: 100%; background-color: ${yearColors.get(year)}; border-left: 1px solid ${slate400};`}
         ></div>
         {#if year == hoverYear}
-          <div class="absolute top-0 left-0">
+          <div class="absolute top-0 right-0">
             <span>{year}</span>
           </div>
         {/if}
