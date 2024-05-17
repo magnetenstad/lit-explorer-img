@@ -69,7 +69,10 @@
       accessor: (fields) => fields.key,
       header: 'Image',
       cell: ({ value }) => {
-        return createRender(BibTableImg, { bibKey: value })
+        return createRender(BibTableImg, {
+          bibKey: value,
+          className: 'rounded-md border',
+        })
       },
       plugins: {
         sort: {
