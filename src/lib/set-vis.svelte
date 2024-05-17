@@ -198,6 +198,6 @@
   })
 </script>
 
-<div style="display: flex; justify-content: center;">
+<div class="flex rounded-md border overflow-hidden">
   <div bind:this={gameDiv}></div>
 </div>

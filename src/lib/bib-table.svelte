@@ -20,6 +20,7 @@
   import { parseKeywords } from './bib'
   import BibTableActions from './bib-table-actions.svelte'
   import { Button } from './components/ui/button'
+  import ScrollArea from './components/ui/scroll-area/scroll-area.svelte'
 
   export let bib: Library
   const tableData = writable<Entry[]>(bib.entries)
@@ -151,7 +152,7 @@
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   </div>
-  <div class="rounded-md border">
+  <ScrollArea class="h-[90svh] rounded-md border">
     <Table.Root {...$tableAttrs}>
       <Table.Header>
         {#each $headerRows as headerRow}
@@ -196,5 +197,5 @@
         {/each}
       </Table.Body>
     </Table.Root>
-  </div>
+  </ScrollArea>
 </div>

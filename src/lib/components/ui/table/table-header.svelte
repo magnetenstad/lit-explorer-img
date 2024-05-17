@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { HTMLAttributes } from "svelte/elements";
-	import { cn } from "$lib/utils.js";
+	import { cn } from "$lib/utils.js"
+	import type { HTMLAttributes } from "svelte/elements"
 
 	type $$Props = HTMLAttributes<HTMLTableSectionElement>;
 
@@ -9,6 +9,6 @@
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<thead class={cn("[&_tr]:border-b", className)} {...$$restProps} on:click on:keydown>
+<thead class={cn("sticky top-0 bg-secondary [&_tr]:border-b", className)} {...$$restProps} on:click on:keydown>
 	<slot />
 </thead>
