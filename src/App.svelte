@@ -54,8 +54,10 @@
   {#if bib}
     <div class="flex gap-[1em] mx-[1em]">
       <div class="flex flex-col flex-1 max-h-[100svh] overflow-auto">
-        <div class="prose m-3">
-          <h2>SurVis2</h2>
+        <div class="flex justify-between items-end">
+          <div class="prose m-3">
+            <h2>SurVis2</h2>
+          </div>
         </div>
         <div class="prose m-3">
           <h3>Timeline</h3>

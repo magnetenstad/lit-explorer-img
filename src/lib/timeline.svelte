@@ -2,6 +2,7 @@
   import { type Entry } from '@retorquere/bibtex-parser'
   import { getEntryYear, yearFilter } from './bib-store'
   import { red500, slate200, slate400 } from './colors'
+  import Button from './components/ui/button/button.svelte'
 
   export let bibEntries: Entry[]
 
@@ -62,7 +63,18 @@
   $: yearColors = getYearColors(years, hoverYear, selectedYears)
 </script>
 
-<div>
+<div class="relative">
+  {#if selectedYears.size}
+    <Button
+      class="absolute right-0 transform translate-y-[-45px]"
+      variant="outline"
+      on:click={() => {
+        selectedYears.clear()
+        yearFilter.set(new Set())
+        selectedYears = selectedYears
+      }}>Clear</Button
+    >
+  {/if}
   <div class="flex flex-row rounded-md border items-stretch relative">
     {#each years as [year, entries]}
       <button

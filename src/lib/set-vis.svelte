@@ -11,6 +11,7 @@
   } from 'web-game-engine'
   import { parseKeywords } from './bib'
   import { setVisFilter } from './bib-store'
+  import Button from './components/ui/button/button.svelte'
   import { BibNode, BibSet, HightlightState, lineColor } from './set-vis'
 
   export let allBibEntries: Entry[]
@@ -19,6 +20,7 @@
 
   class Center extends PositionObject {}
   const bibNodes: BibNode[] = []
+  let selectedSets = new Set<BibSet>()
 
   const getActiveBibNodes = () => {
     return bibNodes.filter((node) =>
@@ -66,7 +68,6 @@
       return new BibSet(0, 0, category, target).activate(game)
     })
     const connections: [BibNode, BibNode][] = []
-    const selectedSets = new Set<BibSet>()
     let hoverSet: BibSet | null = null
 
     center.onMousePress = (ev) => {
@@ -76,6 +77,7 @@
         } else {
           selectedSets.add(hoverSet)
         }
+        selectedSets = selectedSets
         setVisFilter.set(
           selectedSets.size
             ? new Set(
@@ -183,6 +185,21 @@
   })
 </script>
 
-<div class="flex rounded-md border overflow-hidden">
-  <div bind:this={gameDiv}></div>
+<div>
+  {#if selectedSets.size}
+    <div class="relative">
+      <Button
+        class="absolute right-0 transform translate-y-[-45px]"
+        variant="outline"
+        on:click={() => {
+          selectedSets.clear()
+          setVisFilter.set(new Set())
+        }}>Clear</Button
+      >
+    </div>
+  {/if}
+
+  <div class="flex rounded-md border overflow-hidden">
+    <div bind:this={gameDiv}></div>
+  </div>
 </div>
