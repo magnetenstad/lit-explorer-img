@@ -4,7 +4,7 @@ import {
   type DrawContext,
   type GameContext,
 } from 'web-game-engine'
-import { red500, slate200, slate400 } from './colors'
+import { red500, red900, slate200, slate400, slate600 } from './colors'
 
 export enum HightlightState {
   None,
@@ -12,16 +12,7 @@ export enum HightlightState {
   Selected,
 }
 
-const hightlightStateColor = (state: HightlightState) => {
-  switch (state) {
-    case HightlightState.None:
-      return 'transparent'
-    case HightlightState.Hover:
-      return 'gray'
-    case HightlightState.Selected:
-      return 'red'
-  }
-}
+export const lineColor = slate600
 
 export class BibNode extends PositionObject {
   bibSet: BibSet
@@ -61,21 +52,22 @@ export class BibNode extends PositionObject {
     this.pos = this.pos.plus(this.speed)
   }
 
-  getColor() {
+  getColors() {
     switch (this.highlight) {
       case HightlightState.None:
-        return slate200
+        return { fill: slate200, stroke: slate600 }
       case HightlightState.Hover:
-        return slate400
+        return { fill: slate400, stroke: slate600 }
       case HightlightState.Selected:
-        return red500
+        return { fill: red500, stroke: red900 }
     }
   }
 
   draw(ctx: DrawContext): void {
+    const colors = this.getColors()
     ctx.canvas.drawCircle(this.radius, this.pos, {
-      fillStyle: this.getColor(),
-      strokeStyle: 'black',
+      fillStyle: colors.fill,
+      strokeStyle: colors.stroke,
     })
   }
 }
@@ -147,7 +139,7 @@ export class BibSet extends PositionObject {
   draw(ctx: DrawContext): void {
     ctx.canvas.drawCircle(this.radius, this.pos, {
       fillStyle: 'transparent',
-      strokeStyle: 'black',
+      strokeStyle: lineColor,
       lineWidth: this.getLineWidth(),
     })
     const pos = this.pos
@@ -157,7 +149,7 @@ export class BibSet extends PositionObject {
       this.pos.moveTowards(pos, this.radius),
       pos,
       {},
-      { strokeStyle: 'black' }
+      { strokeStyle: lineColor }
     )
     ctx.canvas.drawText(this.title, pos, {
       fillStyle: 'black',

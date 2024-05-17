@@ -1,3 +1,5 @@
 export const slate200 = 'rgb(226 232 240)'
 export const slate400 = 'rgb(148 163 184)'
+export const slate600 = 'rgb(71 85 105)'
 export const red500 = 'rgb(239 68 68)'
+export const red900 = 'rgb(127 29 29)'

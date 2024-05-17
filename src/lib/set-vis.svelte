@@ -10,7 +10,7 @@
     Vec2,
   } from 'web-game-engine'
   import { parseKeywords } from './bib'
-  import { BibNode, BibSet, HightlightState } from './set-vis'
+  import { BibNode, BibSet, HightlightState, lineColor } from './set-vis'
 
   let gameDiv: HTMLDivElement
   export let bib: Library
@@ -118,7 +118,7 @@
       ctx.canvas.drawRect(new Vec2(-1000, -1000), new Vec2(2000, 2000))
 
       connections.forEach(([a, b]) => {
-        ctx.canvas.drawLine(a.pos, b.pos, {}, { strokeStyle: 'black' })
+        ctx.canvas.drawLine(a.pos, b.pos, {}, { strokeStyle: lineColor })
         const l = a.pos.lengthTo(b.pos)
         a.speed = a.speed.plus(
           b.pos.minus(a.pos).multiply(Math.pow(l / 4000, 2))
