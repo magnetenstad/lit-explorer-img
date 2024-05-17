@@ -2,6 +2,7 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu'
   import { Input } from '$lib/components/ui/input'
   import * as Table from '$lib/components/ui/table'
+  import * as Tabs from '$lib/components/ui/tabs'
   import type { Creator, Entry } from '@retorquere/bibtex-parser'
   import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down'
   import ChevronDown from 'lucide-svelte/icons/chevron-down'
@@ -25,6 +26,10 @@
   import ScrollArea from './components/ui/scroll-area/scroll-area.svelte'
 
   export let bibEntries: Readable<Entry[]>
+  let unwrappedBibEntries: Entry[] = []
+  bibEntries.subscribe((entries) => {
+    unwrappedBibEntries = entries
+  })
 
   const keywordsToCategoryString = (
     keywords: { key: string; value: string }[]
@@ -144,14 +149,18 @@
   onDestroy(unsubscribe)
 </script>
 
-<div>
-  <div class="flex items-center py-4">
+<Tabs.Root value="table">
+  <div class="flex justify-between gap-4 items-center py-4">
     <Input
       class="max-w-sm"
       placeholder={`Search in ${numEntries} publications`}
       type="text"
       bind:value={$filterValue}
     />
+    <Tabs.List>
+      <Tabs.Trigger value="table">Table</Tabs.Trigger>
+      <Tabs.Trigger value="image-grid">Image Grid</Tabs.Trigger>
+    </Tabs.List>
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild let:builder>
         <Button variant="outline" class="ml-auto" builders={[builder]}>
@@ -169,50 +178,67 @@
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   </div>
-  <ScrollArea class="h-[90svh] rounded-md border">
-    <Table.Root {...$tableAttrs}>
-      <Table.Header>
-        {#each $headerRows as headerRow}
-          <Subscribe rowAttrs={headerRow.attrs()}>
-            <Table.Row>
-              {#each headerRow.cells as cell (cell.id)}
-                <Subscribe
-                  attrs={cell.attrs()}
-                  let:attrs
-                  props={cell.props()}
-                  let:props
-                >
-                  <Table.Head {...attrs}>
-                    {#if ['Author', 'Title', 'Date'].includes(cell.id)}
-                      <Button variant="ghost" on:click={props.sort.toggle}>
+
+  <Tabs.Content value="table">
+    <ScrollArea class="h-[90svh] rounded-md border">
+      <Table.Root {...$tableAttrs}>
+        <Table.Header>
+          {#each $headerRows as headerRow}
+            <Subscribe rowAttrs={headerRow.attrs()}>
+              <Table.Row>
+                {#each headerRow.cells as cell (cell.id)}
+                  <Subscribe
+                    attrs={cell.attrs()}
+                    let:attrs
+                    props={cell.props()}
+                    let:props
+                  >
+                    <Table.Head {...attrs}>
+                      {#if ['Author', 'Title', 'Date'].includes(cell.id)}
+                        <Button variant="ghost" on:click={props.sort.toggle}>
+                          <Render of={cell.render()} />
+                          <ArrowUpDown class={'ml-2 h-4 w-4'} />
+                        </Button>
+                      {:else}
                         <Render of={cell.render()} />
-                        <ArrowUpDown class={'ml-2 h-4 w-4'} />
-                      </Button>
-                    {:else}
+                      {/if}
+                    </Table.Head>
+                  </Subscribe>
+                {/each}
+              </Table.Row>
+            </Subscribe>
+          {/each}
+        </Table.Header>
+        <Table.Body {...$tableBodyAttrs}>
+          {#each $pageRows as row (row.id)}
+            <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+              <Table.Row {...rowAttrs}>
+                {#each row.cells as cell (cell.id)}
+                  <Subscribe attrs={cell.attrs()} let:attrs>
+                    <Table.Cell {...attrs}>
                       <Render of={cell.render()} />
-                    {/if}
-                  </Table.Head>
-                </Subscribe>
-              {/each}
-            </Table.Row>
-          </Subscribe>
-        {/each}
-      </Table.Header>
-      <Table.Body {...$tableBodyAttrs}>
-        {#each $pageRows as row (row.id)}
-          <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-            <Table.Row {...rowAttrs}>
-              {#each row.cells as cell (cell.id)}
-                <Subscribe attrs={cell.attrs()} let:attrs>
-                  <Table.Cell {...attrs}>
-                    <Render of={cell.render()} />
-                  </Table.Cell>
-                </Subscribe>
-              {/each}
-            </Table.Row>
-          </Subscribe>
-        {/each}
-      </Table.Body>
-    </Table.Root>
-  </ScrollArea>
-</div>
+                    </Table.Cell>
+                  </Subscribe>
+                {/each}
+              </Table.Row>
+            </Subscribe>
+          {/each}
+        </Table.Body>
+      </Table.Root>
+    </ScrollArea>
+  </Tabs.Content>
+
+  <Tabs.Content value="image-grid">
+    <div class="flex flex-wrap gap-2">
+      {#each unwrappedBibEntries as entry}
+        <div>
+          <BibTableImg
+            className="cursor-pointer hover:shadow-lg rounded-md border"
+            bibKey={entry.key}
+            width="140px"
+          ></BibTableImg>
+        </div>
+      {/each}
+    </div>
+  </Tabs.Content>
+</Tabs.Root>
