@@ -14,6 +14,7 @@ export enum HightlightState {
 }
 
 export const lineColor = slate600
+const maxSpeed = 10
 
 export class BibNode extends PositionObject {
   key: string
@@ -51,7 +52,7 @@ export class BibNode extends PositionObject {
 
     this.speed = this.speed
       .multiply(0.95)
-      .clamp(new Vec2(-10, -10), new Vec2(10, 10))
+      .clamp(new Vec2(-maxSpeed, -maxSpeed), new Vec2(maxSpeed, maxSpeed))
     this.pos = this.pos.plus(this.speed)
   }
 
@@ -117,11 +118,11 @@ export class BibSet extends PositionObject {
     })
 
     const l = Math.max(this.pos.lengthTo(this.target), 1)
-    this.pos = this.pos.moveTowards(this.target, l / 100)
+    this.pos = this.pos.moveTowards(this.target, l / 50)
 
     this.speed = this.speed
-      .multiply(0.9)
-      .clamp(new Vec2(-10, -10), new Vec2(10, 10))
+      .multiply(0.95)
+      .clamp(new Vec2(-maxSpeed, -maxSpeed), new Vec2(maxSpeed, maxSpeed))
     this.pos = this.pos.plus(this.speed)
 
     this.radius = bibsetMinRadius
