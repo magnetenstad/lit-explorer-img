@@ -20,6 +20,7 @@
   import { type Readable } from 'svelte/store'
   import { parseKeywords } from './bib'
   import BibTableActions from './bib-table-actions.svelte'
+  import BibTableImg from './bib-table-img.svelte'
   import { Button } from './components/ui/button'
   import ScrollArea from './components/ui/scroll-area/scroll-area.svelte'
 
@@ -59,6 +60,18 @@
     hide: addHiddenColumns(),
   })
   const columns = table.createColumns([
+    table.column({
+      accessor: (fields) => fields.key,
+      header: 'Image',
+      cell: ({ value }) => {
+        return createRender(BibTableImg, { bibKey: value })
+      },
+      plugins: {
+        sort: {
+          disable: true,
+        },
+      },
+    }),
     table.column({
       accessor: (entry) => authorsToString(entry.fields.author ?? []),
       header: 'Author',
