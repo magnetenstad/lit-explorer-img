@@ -2,16 +2,17 @@
   import { Button } from '$lib/components/ui/button/index.js'
   import * as Collapsible from '$lib/components/ui/collapsible/index.js'
   import * as ToggleGroup from '$lib/components/ui/toggle-group/index.js'
-  import { type Library } from '@retorquere/bibtex-parser'
+  import { type Entry } from '@retorquere/bibtex-parser'
   import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down'
+  import { authorFilter, authorToString } from './bib-store'
 
-  export let bib: Library
+  export let bibEntries: Entry[]
 
-  const extractAuthors = (bib: Library) => {
+  const extractAuthors = (bibEntries: Entry[]) => {
     const authorCounts = new Map()
-    bib.entries.forEach((entry) => {
+    bibEntries.forEach((entry) => {
       entry.fields.author?.forEach((author) => {
-        const key = `${author.firstName} ${author.lastName}`
+        const key = authorToString(author)
         if (authorCounts.has(key)) {
           authorCounts.set(key, authorCounts.get(key) + 1)
         } else {
@@ -22,12 +23,17 @@
     return [...authorCounts.entries()].toSorted((a, b) => b[1] - a[1])
   }
 
-  $: authors = extractAuthors(bib)
+  $: authors = extractAuthors(bibEntries)
   $: firstAuthors = authors.slice(0, 20)
   $: laterAuthors = authors.slice(20)
 </script>
 
-<ToggleGroup.Root type="multiple">
+<ToggleGroup.Root
+  type="multiple"
+  onValueChange={(authors) => {
+    authorFilter.set(new Set(authors))
+  }}
+>
   <Collapsible.Root>
     <div class="flex flex-wrap space-x-1 space-y-1">
       {#each firstAuthors as author}

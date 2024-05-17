@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Library } from '@retorquere/bibtex-parser'
+  import { type Entry } from '@retorquere/bibtex-parser'
   import { onMount } from 'svelte'
   import {
     Camera,
@@ -10,25 +10,39 @@
     Vec2,
   } from 'web-game-engine'
   import { parseKeywords } from './bib'
+  import { setVisFilter } from './bib-store'
   import { BibNode, BibSet, HightlightState, lineColor } from './set-vis'
 
+  export let allBibEntries: Entry[]
+  export let filteredBibEntries: Entry[]
   let gameDiv: HTMLDivElement
-  export let bib: Library
 
   class Center extends PositionObject {}
+  const bibNodes: BibNode[] = []
 
-  onMount(async () => {
-    const options = {
-      width: 1600,
-      height: 750,
+  const getActiveBibNodes = () => {
+    return bibNodes.filter((node) =>
+      filteredBibEntries.some((entry) => node.key == entry.key)
+    )
+  }
+
+  const getInactiveBibNodes = () => {
+    return bibNodes.filter(
+      (node) => !filteredBibEntries.some((entry) => node.key == entry.key)
+    )
+  }
+
+  onMount(() => {
+    const width = 1600
+    const height = 750
+    const game = new Game(gameDiv).setOptions({
+      width,
+      height,
       scale: 0.6,
       fps: 60,
-    }
-    const game = new Game(gameDiv).setOptions(options)
+    })
     const center = new Center(0, 0).activate(game)
-    game.canvas.camera = new Camera(
-      new Vec2(options.width, options.height)
-    ).setTarget(center)
+    game.canvas.camera = new Camera(new Vec2(width, height)).setTarget(center)
 
     new TextObject(() => `FPS: ${game.currentFps.toFixed(1)}`, 8, 8, {
       gui: true,
@@ -36,7 +50,7 @@
     }).activate(game)
 
     const categories = new Set<string>()
-    bib.entries.forEach((entry) => {
+    allBibEntries.forEach((entry) => {
       parseKeywords(entry.fields.keywords ?? [])
         .filter((kv) => kv.key == 'category')
         .forEach((kv) => {
@@ -51,60 +65,37 @@
         .multiply(-1)
       return new BibSet(0, 0, category, target).activate(game)
     })
-    const bibNodes: BibNode[] = []
     const connections: [BibNode, BibNode][] = []
     const selectedSets = new Set<BibSet>()
-    const selectedNodes = new Set<BibNode>()
-    let hoverNode: BibNode | null = null
     let hoverSet: BibSet | null = null
-
-    const selectNode = (node: BibNode) => {
-      selectedNodes.add(node)
-      connections.forEach(([a, b]) => {
-        if (a == node || b == node) {
-          selectedNodes.add(a)
-          selectedNodes.add(b)
-        }
-      })
-    }
-    const unselectNode = (node: BibNode) => {
-      selectedNodes.delete(node)
-      connections.forEach(([a, b]) => {
-        if (a == node || b == node) {
-          selectedNodes.delete(a)
-          selectedNodes.delete(b)
-        }
-      })
-    }
 
     center.onMousePress = (ev) => {
       if (ev.button == MouseButton.Left && hoverSet) {
         if (selectedSets.has(hoverSet)) {
           selectedSets.delete(hoverSet)
-          hoverSet.nodes.forEach((node) => unselectNode(node))
         } else {
           selectedSets.add(hoverSet)
-          hoverSet.nodes.forEach((node) => selectNode(node))
         }
-      }
-
-      if (ev.button == MouseButton.Left && hoverNode) {
-        if (selectedNodes.has(hoverNode)) {
-          unselectNode(hoverNode)
-        } else {
-          selectNode(hoverNode)
-        }
+        setVisFilter.set(
+          selectedSets.size
+            ? new Set(
+                [...selectedSets]
+                  .flatMap((set) => set.nodes)
+                  .map((node) => node.key)
+              )
+            : new Set()
+        )
       }
     }
 
-    bib.entries.forEach((entry) => {
+    allBibEntries.forEach((entry) => {
       let prevNode: BibNode | null = null
       parseKeywords(entry.fields.keywords ?? [])
         .filter((kv) => kv.key == 'category')
         .forEach((kv) => {
           const bibSet = bibSets.find((b) => b.title == kv.value)
           if (bibSet) {
-            const node = new BibNode(0, 0, bibSet).activate(game)
+            const node = new BibNode(0, 0, entry.key, bibSet).activate(game)
             bibNodes.push(node)
             if (prevNode) {
               connections.push([prevNode, node])
@@ -142,35 +133,18 @@
 
     game.afterStep = (ctx) => {
       const mouse = ctx.input.mouse.worldPos
-      hoverNode = null
       hoverSet = null
-      bibNodes.forEach((node) => (node.highlight = HightlightState.None))
-      bibSets.forEach((set) => (set.highlight = HightlightState.None))
-      selectedNodes.forEach((node) => {
-        highlightNode(node, HightlightState.Selected)
+      const activeBibNodes = getActiveBibNodes()
+      const inactiveBibNodes = getInactiveBibNodes()
+      activeBibNodes.forEach((node) => {
+        node.highlight = HightlightState.None
       })
+      inactiveBibNodes.forEach((node) => {
+        node.highlight = HightlightState.Inactive
+      })
+      bibSets.forEach((set) => (set.highlight = HightlightState.None))
 
-      if (bibNodes.length) {
-        let minNode = bibNodes[0]
-        let minDistance = minNode.pos.lengthTo(mouse)
-        bibNodes.forEach((node) => {
-          const distance = node.pos.lengthTo(mouse)
-          if (distance < minDistance) {
-            minDistance = distance
-            minNode = node
-          }
-        })
-
-        if (minDistance < minNode.radius + 4) {
-          hoverNode = minNode
-        }
-      }
-
-      if (hoverNode) {
-        highlightNode(hoverNode, HightlightState.Hover)
-      }
-
-      if (!hoverNode && bibSets.length) {
+      if (bibSets.length) {
         let minSet = bibSets[0]
         let minDistance = minSet.pos.lengthTo(mouse)
         bibSets.forEach((node) => {
@@ -188,13 +162,20 @@
 
       if (hoverSet) {
         hoverSet.highlight = HightlightState.Hover
-        hoverSet.nodes.forEach((node) =>
-          highlightNode(node, HightlightState.Hover)
-        )
+        hoverSet.nodes.forEach((node) => {
+          if (activeBibNodes.includes(node)) {
+            highlightNode(node, HightlightState.Hover)
+          }
+        })
       }
 
       selectedSets.forEach((set) => {
         set.highlight = HightlightState.Selected
+        set.nodes.forEach((node) => {
+          if (activeBibNodes.includes(node)) {
+            highlightNode(node, HightlightState.Selected)
+          }
+        })
       })
     }
 

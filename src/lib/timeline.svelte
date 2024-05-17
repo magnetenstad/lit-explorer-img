@@ -1,19 +1,18 @@
 <script lang="ts">
-  import { type Library } from '@retorquere/bibtex-parser'
+  import { type Entry } from '@retorquere/bibtex-parser'
+  import { getEntryYear, yearFilter } from './bib-store'
   import { red500, slate200, slate400 } from './colors'
 
-  export let bib: Library
+  export let bibEntries: Entry[]
 
-  const extractYears = (bib: Library) => {
+  const extractYears = (bibEntries: Entry[]) => {
     const entriesPerYear = new Map()
-    bib.entries.forEach((entry) => {
-      const dateString = entry.fields.date ?? entry.fields.year
-      if (!dateString) return
-      const key = new Date(dateString).getFullYear()
-      if (entriesPerYear.has(key)) {
-        entriesPerYear.set(key, entriesPerYear.get(key) + 1)
+    bibEntries.forEach((entry) => {
+      const year = getEntryYear(entry)
+      if (entriesPerYear.has(year)) {
+        entriesPerYear.set(year, entriesPerYear.get(year) + 1)
       } else {
-        entriesPerYear.set(key, 1)
+        entriesPerYear.set(year, 1)
       }
     })
     ;[...entriesPerYear.keys()].forEach((year) => {
@@ -34,6 +33,7 @@
       selectedYears.add(year)
     }
     selectedYears = selectedYears
+    yearFilter.set(selectedYears)
   }
 
   const getYearColors = (
@@ -57,19 +57,13 @@
     return yearColors
   }
 
-  $: years = extractYears(bib)
+  $: years = extractYears(bibEntries)
   $: maxEntriesPerYear = Math.max(...years.map((x) => x[1]))
   $: yearColors = getYearColors(years, hoverYear, selectedYears)
 </script>
 
 <div>
   <div class="flex flex-row rounded-md border items-stretch relative">
-    <div class="absolute top-0 left-0">
-      <span>{years.at(0)?.at(0)}</span>
-    </div>
-    <div class="absolute top-0 right-0">
-      <span>{years.at(-1)?.at(0)}</span>
-    </div>
     {#each years as [year, entries]}
       <button
         class="flex-1 relative"
@@ -90,5 +84,11 @@
         {/if}
       </button>
     {/each}
+    <div class="absolute top-0 left-0">
+      <span>{years.at(0)?.at(0)}</span>
+    </div>
+    <div class="absolute top-0 right-0">
+      <span>{years.at(-1)?.at(0)}</span>
+    </div>
   </div>
 </div>

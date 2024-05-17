@@ -10,18 +10,21 @@ export enum HightlightState {
   None,
   Hover,
   Selected,
+  Inactive,
 }
 
 export const lineColor = slate600
 
 export class BibNode extends PositionObject {
+  key: string
   bibSet: BibSet
   speed = new Vec2(0, 0)
   highlight = HightlightState.None
   radius = 10
 
-  constructor(x: number, y: number, bibSet: BibSet) {
+  constructor(x: number, y: number, key: string, bibSet: BibSet) {
     super(x, y)
+    this.key = key
     this.bibSet = bibSet
     this.bibSet.nodes.push(this)
   }
@@ -60,6 +63,8 @@ export class BibNode extends PositionObject {
         return { fill: slate400, stroke: slate600 }
       case HightlightState.Selected:
         return { fill: red500, stroke: red900 }
+      case HightlightState.Inactive:
+        return { fill: 'white', stroke: slate400 }
     }
   }
 

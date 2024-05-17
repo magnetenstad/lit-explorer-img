@@ -2,9 +2,10 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu'
   import { Input } from '$lib/components/ui/input'
   import * as Table from '$lib/components/ui/table'
-  import type { Creator, Entry, Library } from '@retorquere/bibtex-parser'
+  import type { Creator, Entry } from '@retorquere/bibtex-parser'
   import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down'
   import ChevronDown from 'lucide-svelte/icons/chevron-down'
+  import { onDestroy } from 'svelte'
   import {
     Render,
     Subscribe,
@@ -16,14 +17,13 @@
     addSortBy,
     addTableFilter,
   } from 'svelte-headless-table/plugins'
-  import { writable } from 'svelte/store'
+  import { type Readable } from 'svelte/store'
   import { parseKeywords } from './bib'
   import BibTableActions from './bib-table-actions.svelte'
   import { Button } from './components/ui/button'
   import ScrollArea from './components/ui/scroll-area/scroll-area.svelte'
 
-  export let bib: Library
-  const tableData = writable<Entry[]>(bib.entries)
+  export let bibEntries: Readable<Entry[]>
 
   const keywordsToCategoryString = (
     keywords: { key: string; value: string }[]
@@ -50,7 +50,7 @@
     return `${authors[0].firstName} ${authors[0].lastName} et al.`
   }
 
-  const table = createTable(tableData, {
+  const table = createTable(bibEntries, {
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }) =>
@@ -125,13 +125,17 @@
     .map(([id]) => id)
 
   const hidableCols = ['Author', 'Date', 'Categories', 'Doi']
+
+  let numEntries = 0
+  const unsubscribe = bibEntries.subscribe((e) => (numEntries = e.length))
+  onDestroy(unsubscribe)
 </script>
 
 <div>
   <div class="flex items-center py-4">
     <Input
       class="max-w-sm"
-      placeholder="Search.."
+      placeholder={`Search in ${numEntries} publications`}
       type="text"
       bind:value={$filterValue}
     />
