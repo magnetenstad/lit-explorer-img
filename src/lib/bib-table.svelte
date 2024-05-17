@@ -162,7 +162,7 @@
     .filter(([, hide]) => !hide)
     .map(([id]) => id)
 
-  const hidableCols = ['Author', 'Date', 'Categories', 'Doi']
+  const hidableCols = ['Image', 'Author', 'Date', 'Categories', 'Doi']
 
   let numEntries = 0
   const unsubscribe = bibEntries.subscribe((e) => (numEntries = e.length))
