@@ -15,7 +15,13 @@ export const authorFilter = writable(new Set<string>())
 const filterByYear = (entries: Entry[]) => {
   const unwrappedYearFilter = get(yearFilter)
   if (unwrappedYearFilter.size) {
-    entries = entries.filter((e) => unwrappedYearFilter.has(getEntryYear(e)))
+    entries = entries.filter((e) => {
+      const year = getEntryYear(e)
+      if (!year) {
+        return false
+      }
+      return unwrappedYearFilter.has(year)
+    })
   }
   return entries
 }
@@ -73,6 +79,9 @@ export const authorToString = (author: Creator) => {
 
 export const getEntryYear = (entry: Entry) => {
   const dateString = entry.fields.date ?? entry.fields.year
-  if (!dateString) return NaN
-  return new Date(dateString).getFullYear()
+  try {
+    return new Date(dateString).getFullYear()
+  } catch {
+    return undefined
+  }
 }

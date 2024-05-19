@@ -7,11 +7,12 @@
   export let bibEntries: Entry[]
 
   const extractYears = (bibEntries: Entry[]) => {
-    const entriesPerYear = new Map()
+    const entriesPerYear = new Map<number, number>()
     bibEntries.forEach((entry) => {
       const year = getEntryYear(entry)
+      if (!year) return
       if (entriesPerYear.has(year)) {
-        entriesPerYear.set(year, entriesPerYear.get(year) + 1)
+        entriesPerYear.set(year, (entriesPerYear.get(year) ?? 0) + 1)
       } else {
         entriesPerYear.set(year, 1)
       }
@@ -24,8 +25,11 @@
     return [...entriesPerYear.entries()].toSorted((a, b) => a[0] - b[0])
   }
 
-  let hoverYear = 0
+  let hoverYear: number | null = null
+  let startSelectYear: number | null = null
+  let endSelectYear: number | null = null
   let selectedYears = new Set<number>()
+  let mouseDown = false
 
   const toggleYear = (year: number) => {
     if (selectedYears.has(year)) {
@@ -39,10 +43,20 @@
 
   const getYearColors = (
     years: [number, number][],
-    hoverYear: number,
+    hoverYear: number | null,
+    startSelectYear: number | null,
+    endSelectYear: number | null,
     selectedYears: Set<number>
   ) => {
     const getColor = (year: number) => {
+      if (
+        startSelectYear &&
+        endSelectYear &&
+        Math.min(startSelectYear, endSelectYear) <= year &&
+        year <= Math.max(startSelectYear, endSelectYear)
+      ) {
+        return slate400
+      }
       if (selectedYears.has(year)) {
         return red500
       }
@@ -58,9 +72,19 @@
     return yearColors
   }
 
+  function numberRange(start: number, end: number) {
+    return new Array(end - start).fill(0).map((_, i) => i + start)
+  }
+
   $: years = extractYears(bibEntries)
   $: maxEntriesPerYear = Math.max(...years.map((x) => x[1]))
-  $: yearColors = getYearColors(years, hoverYear, selectedYears)
+  $: yearColors = getYearColors(
+    years,
+    hoverYear,
+    startSelectYear,
+    endSelectYear,
+    selectedYears
+  )
 </script>
 
 <div class="relative">
@@ -75,15 +99,41 @@
       }}>Clear</Button
     >
   {/if}
-  <div class="flex flex-row rounded-md border items-stretch relative">
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div
+    class="flex flex-row rounded-md border items-stretch relative"
+    on:mouseup={() => {
+      if (startSelectYear && endSelectYear) {
+        numberRange(
+          Math.min(startSelectYear, endSelectYear),
+          Math.max(startSelectYear, endSelectYear) + 1
+        ).forEach((year) => toggleYear(year))
+      }
+      startSelectYear = null
+      endSelectYear = null
+      mouseDown = false
+    }}
+    on:mouseleave={() => {
+      startSelectYear = null
+      endSelectYear = null
+      mouseDown = false
+    }}
+  >
     {#each years as [year, entries]}
       <button
         class="flex-1 relative"
         style="height: 100px"
-        on:mouseover={() => (hoverYear = year)}
-        on:mouseleave={() => (hoverYear = 0)}
+        on:mouseenter={() => {
+          hoverYear = year
+          if (mouseDown) endSelectYear = year
+        }}
+        on:mousedown={() => {
+          startSelectYear = year
+          endSelectYear = year
+          mouseDown = true
+        }}
+        on:mouseleave={() => (hoverYear = null)}
         on:focus={() => (hoverYear = year)}
-        on:click={() => toggleYear(year)}
       >
         <div
           class="absolute bottom-0"
