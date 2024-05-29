@@ -10,7 +10,7 @@ Follow these steps to host LitExplorer with your own literature collection:
 4. Replace `base` in `vite.config.ts` according to how you intend to host the site
 5. Run `npm run dev` to host the site locally
 
-A GitHub deploy action is also included in `.github/workflows/deploy.yaml`, for hosting with GitHub Pages. This script will deploy the site after each pushed commit to `main`. Make sure your GitHub repository is configured to host with GitHub Actions.
+A GitHub deploy action is also included in `.github/workflows/deploy.yaml`, for hosting with GitHub Pages. This action will deploy the site after each pushed commit to `main`. Make sure that your GitHub repository has GitHub Pages enabled, and configured to host with GitHub Actions.
 
 Alternatively, run `npm run build` to build the site to `dist`, and host the contents.
 
