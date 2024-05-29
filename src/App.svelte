@@ -1,6 +1,5 @@
 <script lang="ts">
   import Authors from '$lib/authors.svelte'
-  import { base } from '$lib/base'
   import {
     allBibEntries,
     authorEntries,
@@ -20,7 +19,7 @@
 
   let bib: Library | null = null
   onMount(async () => {
-    const response = await fetch(`${base}/references.bib`)
+    const response = await fetch(`${import.meta.env.BASE_URL}references.bib`)
     const file = await response.text()
     bib = parse(file)
     allBibEntries.set(bib.entries)

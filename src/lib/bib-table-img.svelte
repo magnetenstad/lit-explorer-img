@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { base } from './base'
-
   export let bibKey: string
   export let className = ''
   export let width = '100px'
@@ -10,7 +8,7 @@
 {#if bibKey}
   <img
     class={className}
-    src={`${base}/img/${dir}/${bibKey}.png`}
+    src={`${import.meta.env.BASE_URL}img/${dir}/${bibKey}.png`}
     alt={`Thumbnail for ${bibKey}`}
     {width}
   />

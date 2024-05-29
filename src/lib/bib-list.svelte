@@ -2,12 +2,11 @@
   import type { Library } from '@retorquere/bibtex-parser'
   import { parse } from '@retorquere/bibtex-parser'
   import { onMount } from 'svelte'
-  import { base } from './base'
 
   let bib: Library | null = null
 
   onMount(async () => {
-    const response = await fetch(`${base}/references.bib`)
+    const response = await fetch(`${import.meta.env.BASE_URL}references.bib`)
     const file = await response.text()
     bib = parse(file)
   })
