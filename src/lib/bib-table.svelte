@@ -289,11 +289,12 @@
             )}</Dialog.Description
           >
         </Dialog.Header>
-        <div class="prose min-w-[100%]">
+        <div class="prose min-w-[100%] max-h-[600px] overflow-auto">
           <BibTableImg
             bibKey={hoverEntry.key}
-            className="rounded-md border float-right"
-            width="300px"
+            className="rounded-md border"
+            width="800px"
+            dir="raw"
           ></BibTableImg>
           <p>{hoverEntry.fields.date ?? ''}</p>
           <p>
@@ -319,7 +320,7 @@
               toast.success('BibTex has been copied', {
                 description: hoverEntry.fields.title,
               })
-            }}>Copy BibText</Button
+            }}>Copy BibTex</Button
           >
         </Dialog.Footer>
       </Dialog.Content>

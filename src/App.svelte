@@ -1,5 +1,6 @@
 <script lang="ts">
   import Authors from '$lib/authors.svelte'
+  import { base } from '$lib/base'
   import {
     allBibEntries,
     authorEntries,
@@ -19,7 +20,7 @@
 
   let bib: Library | null = null
   onMount(async () => {
-    const response = await fetch('/survis2/references.bib')
+    const response = await fetch(`${base}/references.bib`)
     const file = await response.text()
     bib = parse(file)
     allBibEntries.set(bib.entries)
@@ -58,7 +59,7 @@
         <div class="flex flex-col max-h-[100svh] overflow-auto px-4">
           <div class="flex justify-between items-end">
             <div class="prose m-3">
-              <h2>SurVis2</h2>
+              <h2>LitExplorer</h2>
             </div>
           </div>
           <div class="prose m-3">

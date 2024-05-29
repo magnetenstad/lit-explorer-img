@@ -5,7 +5,7 @@ import { defineConfig } from 'vite'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [svelte()],
-  base: '/survis2/',
+  base: '/lit-explorer/',
   resolve: {
     alias: {
       $lib: path.resolve('./src/lib'),
