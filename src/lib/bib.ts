@@ -1,7 +1,9 @@
-export const parseKeywords = (keywords: string[]) => {
-  return keywords.map((kvPair) => {
-    if (!kvPair.includes(':')) return { key: kvPair, value: kvPair }
-    const [key, value] = kvPair.split(':')
-    return { key, value }
-  })
+import type { Entry } from '@retorquere/bibtex-parser'
+
+export const parseCategories = (entry: Entry) => {
+  if (!entry.fields.categories) return []
+  return entry.fields.categories
+    .split(',')
+    .map((c) => c.trim())
+    .toSorted()
 }

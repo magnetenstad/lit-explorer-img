@@ -21,7 +21,7 @@
   } from 'svelte-headless-table/plugins'
   import { toast } from 'svelte-sonner'
   import { type Readable } from 'svelte/store'
-  import { parseKeywords } from './bib'
+  import { parseCategories } from './bib'
   import BibTableActions from './bib-table-actions.svelte'
   import BibTableImg from './bib-table-img.svelte'
   import { Button } from './components/ui/button'
@@ -32,18 +32,6 @@
   bibEntries.subscribe((entries) => {
     unwrappedBibEntries = entries
   })
-
-  const keywordsToCategoryString = (
-    keywords: { key: string; value: string }[]
-  ) => {
-    const categories = keywords.filter(
-      (keyword) => keyword.key.toLowerCase() == 'category'
-    )
-    return categories.reduce(
-      (prev: string, curr) => prev + (prev.length ? ', ' : '') + curr.value,
-      ''
-    )
-  }
 
   const authorsToString = (authors: Creator[]) => {
     if (authors.length == 0) {
@@ -117,8 +105,7 @@
       header: 'Date',
     }),
     table.column({
-      accessor: (entry) =>
-        keywordsToCategoryString(parseKeywords(entry.fields.keywords ?? [])),
+      accessor: (entry) => parseCategories(entry).join(', '),
       header: 'Categories',
     }),
     // table.column({
@@ -301,9 +288,7 @@
             {hoverEntry.fields.abstract ?? ''}
           </p>
           <p>
-            {keywordsToCategoryString(
-              parseKeywords(hoverEntry.fields.keywords ?? [])
-            )}
+            {parseCategories(hoverEntry).join(', ')}
           </p>
         </div>
         <Dialog.Footer>

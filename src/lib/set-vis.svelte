@@ -9,7 +9,7 @@
     TextObject,
     Vec2,
   } from 'web-game-engine'
-  import { parseKeywords } from './bib'
+  import { parseCategories } from './bib'
   import { setVisFilter } from './bib-store'
   import Button from './components/ui/button/button.svelte'
   import { BibNode, BibSet, HightlightState, lineColor } from './set-vis'
@@ -53,11 +53,9 @@
 
     const categories = new Set<string>()
     allBibEntries.forEach((entry) => {
-      parseKeywords(entry.fields.keywords ?? [])
-        .filter((kv) => kv.key == 'category')
-        .forEach((kv) => {
-          categories.add(kv.value)
-        })
+      parseCategories(entry).forEach((category) => {
+        categories.add(category)
+      })
     })
 
     let target = new Vec2(0, 0)
@@ -92,19 +90,17 @@
 
     allBibEntries.forEach((entry) => {
       let prevNode: BibNode | null = null
-      parseKeywords(entry.fields.keywords ?? [])
-        .filter((kv) => kv.key == 'category')
-        .forEach((kv) => {
-          const bibSet = bibSets.find((b) => b.title == kv.value)
-          if (bibSet) {
-            const node = new BibNode(0, 0, entry.key, bibSet).activate(game)
-            bibNodes.push(node)
-            if (prevNode) {
-              connections.push([prevNode, node])
-            }
-            prevNode = node
+      parseCategories(entry).forEach((category) => {
+        const bibSet = bibSets.find((b) => b.title == category)
+        if (bibSet) {
+          const node = new BibNode(0, 0, entry.key, bibSet).activate(game)
+          bibNodes.push(node)
+          if (prevNode) {
+            connections.push([prevNode, node])
           }
-        })
+          prevNode = node
+        }
+      })
     })
 
     game.beforeDraw = (ctx) => {
