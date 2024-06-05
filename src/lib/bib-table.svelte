@@ -91,7 +91,7 @@
       plugins: {
         sort: {
           compareFn: (left, right) => {
-            return ('' + left).localeCompare(right)
+            return ('' + left.toLowerCase()).localeCompare(right.toLowerCase())
           },
         },
       },
@@ -103,6 +103,17 @@
     table.column({
       accessor: (entry) => entry.fields.date ?? '',
       header: 'Date',
+    }),
+    table.column({
+      accessor: (entry) => entry.fields.name ?? '',
+      header: 'Name',
+      plugins: {
+        sort: {
+          compareFn: (left, right) => {
+            return ('' + left.toLowerCase()).localeCompare(right.toLowerCase())
+          },
+        },
+      },
     }),
     table.column({
       accessor: (entry) => parseCategories(entry).join(', '),
@@ -149,7 +160,7 @@
     .filter(([, hide]) => !hide)
     .map(([id]) => id)
 
-  const hidableCols = ['Image', 'Author', 'Date', 'Categories', 'Doi']
+  const hidableCols = ['Image', 'Author', 'Date', 'Name', 'Categories', 'Doi']
 
   let numEntries = 0
   const unsubscribe = bibEntries.subscribe((e) => (numEntries = e.length))
@@ -204,7 +215,7 @@
                       let:props
                     >
                       <Table.Head {...attrs}>
-                        {#if ['Author', 'Title', 'Date', 'Categories'].includes(cell.id)}
+                        {#if ['Author', 'Title', 'Date', 'Name', 'Categories'].includes(cell.id)}
                           <Button variant="ghost" on:click={props.sort.toggle}>
                             <Render of={cell.render()} />
                             <ArrowUpDown class={'ml-2 h-4 w-4'} />
