@@ -4,12 +4,14 @@
     allBibEntries,
     authorEntries,
     dataTableEntries,
+    nameEntries,
     setVisEntries,
     timelineEntries,
   } from '$lib/bib-store'
   import BibTable from '$lib/bib-table.svelte'
   import * as Resizable from '$lib/components/ui/resizable'
   import { Toaster } from '$lib/components/ui/sonner'
+  import Names from '$lib/names.svelte'
   import SetVis from '$lib/set-vis.svelte'
   import Timeline from '$lib/timeline.svelte'
   import type { Entry, Library } from '@retorquere/bibtex-parser'
@@ -37,6 +39,9 @@
   const unsubAuthor = authorEntries.subscribe(
     (e) => (unwrappedAuthorEntries = e)
   )
+  let unwrappedNameEntries: Entry[] = []
+  const unsubName = nameEntries.subscribe((e) => (unwrappedNameEntries = e))
+
   let unwrappedAllEntries: Entry[] = []
   const unsubAllEntries = allBibEntries.subscribe(
     (e) => (unwrappedAllEntries = e)
@@ -46,6 +51,7 @@
     unsubTimeline()
     unsubSetVis()
     unsubAuthor()
+    unsubName()
     unsubAllEntries()
   })
 </script>
@@ -57,28 +63,38 @@
       <Resizable.Pane>
         <div class="flex flex-col max-h-[100svh] overflow-auto px-4">
           <div class="flex justify-between items-end">
-            <div class="prose m-3">
+            <span class="prose m-3">
               <h2>LitExplorer</h2>
-            </div>
+            </span>
           </div>
-          <div class="prose m-3">
+
+          <span class="prose">
             <h3>Timeline</h3>
-          </div>
+          </span>
           <Timeline bibEntries={unwrappedTimelineEntries}></Timeline>
-          <div class="prose m-3">
+
+          <span class="prose my-5">
             <h3>Categories</h3>
-          </div>
+          </span>
           <div class="flex-1">
             <SetVis
               allBibEntries={unwrappedAllEntries}
               filteredBibEntries={unwrappedSetVisEntries}
             ></SetVis>
           </div>
-          <div class="prose m-3">
+
+          <span class="prose m-3">
             <h3>Authors</h3>
-          </div>
+          </span>
           <div class="flex-1">
             <Authors bibEntries={unwrappedAuthorEntries}></Authors>
+          </div>
+
+          <span class="prose m-3">
+            <h3>Names</h3>
+          </span>
+          <div class="flex-1">
+            <Names bibEntries={unwrappedNameEntries}></Names>
           </div>
         </div>
       </Resizable.Pane>
