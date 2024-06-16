@@ -14,7 +14,8 @@ export enum HightlightState {
 }
 
 export const lineColor = slate600
-const maxSpeed = 10
+const maxSpeedSet = 5
+const maxSpeedNode = 10
 
 export class BibNode extends PositionObject {
   key: string
@@ -31,6 +32,8 @@ export class BibNode extends PositionObject {
   }
 
   step(ctx: GameContext): void {
+    if (ctx.t > 60 * 10) return
+
     const nodes = this.bibSet.nodes.filter((n) => n != this)
 
     nodes.forEach((node) => {
@@ -52,7 +55,10 @@ export class BibNode extends PositionObject {
 
     this.speed = this.speed
       .multiply(0.95)
-      .clamp(new Vec2(-maxSpeed, -maxSpeed), new Vec2(maxSpeed, maxSpeed))
+      .clamp(
+        new Vec2(-maxSpeedNode, -maxSpeedNode),
+        new Vec2(maxSpeedNode, maxSpeedNode)
+      )
     this.pos = this.pos.plus(this.speed)
   }
 
@@ -95,6 +101,9 @@ export class BibSet extends PositionObject {
   }
 
   step(ctx: GameContext): void {
+    if (ctx.t > 60 * 10) return
+    const stepSize = 10 / Math.exp(ctx.t / 100)
+
     const sets = ctx.game
       .getInstancesOfClass<BibSet>(BibSet)
       .filter((n) => n != this)
@@ -102,7 +111,7 @@ export class BibSet extends PositionObject {
     sets.forEach((set) => {
       if (this.pos.equals(set.pos)) {
         this.pos = this.pos.plus(
-          new Vec2((0.5 - Math.random()) * 10, (0.5 - Math.random()) * 10)
+          new Vec2((0.5 - Math.random()) * 100, (0.5 - Math.random()) * 100)
         )
       }
       const l = Math.max(
@@ -118,14 +127,23 @@ export class BibSet extends PositionObject {
     })
 
     const l = Math.max(this.pos.lengthTo(this.target), 1)
-    this.pos = this.pos.moveTowards(this.target, l / 50)
+    const delta = this.target.minus(this.pos)
+    this.speed = this.speed.plus(
+      new Vec2(delta.x * 0.4, delta.y).multiply(
+        (Math.pow(this.nodes.length, 0.3) * l) / 200000
+      )
+    )
 
     this.speed = this.speed
       .multiply(0.95)
-      .clamp(new Vec2(-maxSpeed, -maxSpeed), new Vec2(maxSpeed, maxSpeed))
-    this.pos = this.pos.plus(this.speed)
+      .clamp(
+        new Vec2(-maxSpeedSet, -maxSpeedSet),
+        new Vec2(maxSpeedSet, maxSpeedSet)
+      )
+    this.pos = this.pos.plus(this.speed.multiply(stepSize))
 
     this.radius = bibsetMinRadius
+
     this.nodes.forEach((node) => {
       this.radius = Math.max(this.radius, this.pos.lengthTo(node.pos) + 20)
     })

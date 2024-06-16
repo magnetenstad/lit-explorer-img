@@ -34,6 +34,6 @@
     "svelte-sonner": "^0.3.24",
     "tailwind-merge": "^2.3.0",
     "tailwind-variants": "^0.2.1",
-    "web-game-engine": "^1.2.4"
+    "web-game-engine": "^1.2.5"
   }
 }
