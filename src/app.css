@@ -76,3 +76,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+details summary {
+  cursor: pointer;
+}
+
+details summary > * {
+  display: inline;
+}
