@@ -25,7 +25,6 @@
   import BibTableActions from './bib-table-actions.svelte'
   import BibTableImg from './bib-table-img.svelte'
   import { Button } from './components/ui/button'
-  import ScrollArea from './components/ui/scroll-area/scroll-area.svelte'
 
   export let bibEntries: Readable<Entry[]>
   let unwrappedBibEntries: Entry[] = []
@@ -201,63 +200,68 @@
     </div>
 
     <Tabs.Content value="table">
-      <ScrollArea class="h-[90svh] rounded-md border">
-        <Table.Root {...$tableAttrs}>
-          <Table.Header>
-            {#each $headerRows as headerRow}
-              <Subscribe rowAttrs={headerRow.attrs()}>
-                <Table.Row>
-                  {#each headerRow.cells as cell (cell.id)}
-                    <Subscribe
-                      attrs={cell.attrs()}
-                      let:attrs
-                      props={cell.props()}
-                      let:props
-                    >
-                      <Table.Head {...attrs}>
-                        {#if ['Author', 'Title', 'Date', 'Name', 'Categories'].includes(cell.id)}
-                          <Button variant="ghost" on:click={props.sort.toggle}>
+      <div class="h-[90svh] overflow-auto rounded-md border">
+        <div>
+          <Table.Root {...$tableAttrs}>
+            <Table.Header>
+              {#each $headerRows as headerRow}
+                <Subscribe rowAttrs={headerRow.attrs()}>
+                  <Table.Row>
+                    {#each headerRow.cells as cell (cell.id)}
+                      <Subscribe
+                        attrs={cell.attrs()}
+                        let:attrs
+                        props={cell.props()}
+                        let:props
+                      >
+                        <Table.Head {...attrs}>
+                          {#if ['Author', 'Title', 'Date', 'Name', 'Categories'].includes(cell.id)}
+                            <Button
+                              variant="ghost"
+                              on:click={props.sort.toggle}
+                            >
+                              <Render of={cell.render()} />
+                              <ArrowUpDown class={'ml-2 h-4 w-4'} />
+                            </Button>
+                          {:else}
                             <Render of={cell.render()} />
-                            <ArrowUpDown class={'ml-2 h-4 w-4'} />
-                          </Button>
-                        {:else}
-                          <Render of={cell.render()} />
-                        {/if}
-                      </Table.Head>
-                    </Subscribe>
-                  {/each}
-                </Table.Row>
-              </Subscribe>
-            {/each}
-          </Table.Header>
-          <Table.Body {...$tableBodyAttrs}>
-            {#each $pageRows as row (row.id)}
-              <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-                <Table.Row
-                  {...rowAttrs}
-                  on:click={() => {
-                    hoverEntry = unwrappedBibEntries.at(parseInt(row.id))
-                  }}
-                >
-                  {#each row.cells as cell (cell.id)}
-                    <Subscribe attrs={cell.attrs()} let:attrs>
-                      <Table.Cell {...attrs}>
-                        {#if ['Image', 'Title'].includes(cell.id)}
-                          <Dialog.Trigger>
+                          {/if}
+                        </Table.Head>
+                      </Subscribe>
+                    {/each}
+                  </Table.Row>
+                </Subscribe>
+              {/each}
+            </Table.Header>
+            <Table.Body {...$tableBodyAttrs}>
+              {#each $pageRows as row (row.id)}
+                <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+                  <Table.Row
+                    {...rowAttrs}
+                    on:click={() => {
+                      hoverEntry = unwrappedBibEntries.at(parseInt(row.id))
+                    }}
+                  >
+                    {#each row.cells as cell (cell.id)}
+                      <Subscribe attrs={cell.attrs()} let:attrs>
+                        <Table.Cell {...attrs}>
+                          {#if ['Image', 'Title'].includes(cell.id)}
+                            <Dialog.Trigger>
+                              <Render of={cell.render()} />
+                            </Dialog.Trigger>
+                          {:else}
                             <Render of={cell.render()} />
-                          </Dialog.Trigger>
-                        {:else}
-                          <Render of={cell.render()} />
-                        {/if}
-                      </Table.Cell>
-                    </Subscribe>
-                  {/each}
-                </Table.Row>
-              </Subscribe>
-            {/each}
-          </Table.Body>
-        </Table.Root>
-      </ScrollArea>
+                          {/if}
+                        </Table.Cell>
+                      </Subscribe>
+                    {/each}
+                  </Table.Row>
+                </Subscribe>
+              {/each}
+            </Table.Body>
+          </Table.Root>
+        </div>
+      </div>
     </Tabs.Content>
 
     <Tabs.Content value="image-grid">
