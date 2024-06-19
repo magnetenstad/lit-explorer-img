@@ -102,15 +102,6 @@
       accessor: (entry) => parseCategories(entry).join(', '),
       header: 'Categories',
     }),
-    // table.column({
-    //   accessor: (entry) => entry.fields.doi ?? '',
-    //   header: 'Doi',
-    //   plugins: {
-    //     sort: {
-    //       disable: true,
-    //     },
-    //   },
-    // }),
     table.column({
       accessor: (fields) => fields,
       header: '',
@@ -219,6 +210,7 @@
                   on:click={() => {
                     dialogEntry.set(unwrappedBibEntries.at(parseInt(row.id)))
                   }}
+                  class="cursor-pointer"
                 >
                   {#each row.cells as cell (cell.id)}
                     <Subscribe attrs={cell.attrs()} let:attrs>

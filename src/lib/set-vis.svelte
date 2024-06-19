@@ -1,6 +1,7 @@
 <script lang="ts">
   import { type Entry } from '@retorquere/bibtex-parser'
   import { onMount } from 'svelte'
+  import { get } from 'svelte/store'
   import {
     Camera,
     Game,
@@ -10,7 +11,8 @@
     Vec2,
   } from 'web-game-engine'
   import { parseCategories } from './bib'
-  import { setVisFilter } from './bib-store'
+  import { dialogEntry, setVisFilter } from './bib-store'
+  import BibTableImg from './bib-table-img.svelte'
   import Button from './components/ui/button/button.svelte'
   import { BibNode, BibSet, HightlightState, lineColor } from './set-vis'
 
@@ -21,6 +23,7 @@
   class Center extends PositionObject {}
   const bibNodes: BibNode[] = []
   let selectedSets = new Set<BibSet>()
+  let hoverNode: BibNode | null = null
 
   const getActiveBibNodes = () => {
     return bibNodes.filter((node) =>
@@ -69,11 +72,13 @@
     })
     const connections: [BibNode, BibNode][] = []
     let hoverSet: BibSet | null = null
-    let hoverNode: BibNode | null = null
 
     center.onMousePress = (ev) => {
+      if (get(dialogEntry) != undefined) return
+
       if (ev.button == MouseButton.Left) {
         if (hoverNode) {
+          dialogEntry.set(allBibEntries.find((e) => e.key == hoverNode?.key))
           return
         }
 
@@ -154,6 +159,7 @@
     game.afterStep = (ctx) => {
       const mouse = ctx.input.mouse.worldPos
       hoverSet = null
+      hoverNode = null
       const activeBibNodes = getActiveBibNodes()
       const inactiveBibNodes = getInactiveBibNodes()
       activeBibNodes.forEach((node) => {
@@ -164,7 +170,23 @@
       })
       bibSets.forEach((set) => (set.highlight = HightlightState.None))
 
-      if (bibSets.length) {
+      if (bibNodes.length) {
+        let minNode = bibNodes[0]
+        let minDistance = minNode.pos.lengthTo(mouse)
+        bibNodes.forEach((node) => {
+          const distance = node.pos.lengthTo(mouse)
+          if (distance < minDistance) {
+            minDistance = distance
+            minNode = node
+          }
+        })
+
+        if (minDistance < minNode.radius + 4) {
+          hoverNode = minNode
+        }
+      }
+
+      if (!hoverNode && bibSets.length) {
         let minSet = bibSets[0]
         let minDistance = minSet.pos.lengthTo(mouse)
         bibSets.forEach((node) => {
@@ -197,6 +219,10 @@
           }
         })
       })
+
+      if (hoverNode) {
+        hoverNode.highlight = HightlightState.Hover
+      }
     }
 
     // for (let i = 0; i < 60 * 5; i++) {
@@ -206,9 +232,17 @@
 
     game.play()
   })
+
+  let m = { x: 0, y: 0 }
+
+  function handleMousemove(event: MouseEvent) {
+    m.x = event.clientX
+    m.y = event.clientY
+  }
 </script>
 
-<div>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div on:mousemove={handleMousemove}>
   {#if selectedSets.size}
     <div class="relative">
       <Button
@@ -220,6 +254,18 @@
           selectedSets = selectedSets
         }}>Clear</Button
       >
+    </div>
+  {/if}
+
+  {#if hoverNode}
+    <div class="absolute" style={`top: ${m.y}px; left: ${m.x}px;`}>
+      <BibTableImg bibKey={hoverNode.key} className="rounded-md border"
+      ></BibTableImg>
+      <p class="bg-white">
+        {allBibEntries
+          .find((e) => e.key == hoverNode?.key)
+          ?.fields.title?.slice(0, 32)}..
+      </p>
     </div>
   {/if}
 

@@ -33,6 +33,12 @@
   onDestroy(() => {
     unsub()
   })
+  const resetDialogEntry = (open: boolean) => {
+    if (!open) {
+      dialogEntry.set(undefined)
+    }
+  }
+  $: resetDialogEntry(dialogOpen)
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
