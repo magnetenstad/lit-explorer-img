@@ -4,7 +4,7 @@
   import { onDestroy } from 'svelte'
   import { toast } from 'svelte-sonner'
   import { parseCategories } from './bib'
-  import { dialogEntry } from './bib-store'
+  import { dialogEntry, lockedEntries } from './bib-store'
   import BibTableImg from './bib-table-img.svelte'
   import { Button } from './components/ui/button'
 
@@ -23,16 +23,23 @@
     )
   }
 
-  let hoverEntry = undefined as Entry | undefined
+  let unwrappedDialogEntry = undefined as Entry | undefined
+  let unwrappedLockedEntries = new Set<string>()
   let dialogOpen = false
 
-  const unsub = dialogEntry.subscribe((entry) => {
-    hoverEntry = entry
+  const unsubDialogEntry = dialogEntry.subscribe((entry) => {
+    unwrappedDialogEntry = entry
     dialogOpen = !!entry
   })
+  const unsubLockedEntries = lockedEntries.subscribe(
+    (entries) => (unwrappedLockedEntries = entries)
+  )
+
   onDestroy(() => {
-    unsub()
+    unsubDialogEntry()
+    unsubLockedEntries()
   })
+
   const resetDialogEntry = (open: boolean) => {
     if (!open) {
       dialogEntry.set(undefined)
@@ -42,13 +49,13 @@
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
-  {#if hoverEntry}
+  {#if unwrappedDialogEntry}
     <Dialog.Content class="max-w-[80svw] max-h-[90svh]">
       <Dialog.Header>
-        <Dialog.Title>{hoverEntry.fields.title}</Dialog.Title>
+        <Dialog.Title>{unwrappedDialogEntry.fields.title}</Dialog.Title>
         <Dialog.Description
           >{authorsToStringVerbose(
-            hoverEntry.fields.author ?? []
+            unwrappedDialogEntry.fields.author ?? []
           )}</Dialog.Description
         >
       </Dialog.Header>
@@ -56,25 +63,25 @@
       <div class="flex gap-3 items-start">
         <div class="flex-1 prose max-h-[80svh] overflow-auto">
           <p>
-            {parseCategories(hoverEntry).join(', ')}, {hoverEntry.fields.date ??
-              ''}
+            {parseCategories(unwrappedDialogEntry).join(', ')}, {unwrappedDialogEntry
+              .fields.date ?? ''}
           </p>
           <p>
-            {hoverEntry.fields.abstract ?? ''}
+            {unwrappedDialogEntry.fields.abstract ?? ''}
           </p>
           <details>
             <summary>
               <h4>BibTex</h4>
             </summary>
             <pre
-              style="white-space: pre; overflow-x: hidden;">{hoverEntry.input}</pre>
+              style="white-space: pre; overflow-x: hidden;">{unwrappedDialogEntry.input}</pre>
           </details>
         </div>
 
         <div class="flex-1 max-h-[80svh] flex flex-col justify-between gap-3">
           <div class="overflow-auto">
             <BibTableImg
-              bibKey={hoverEntry.key}
+              bibKey={unwrappedDialogEntry.key}
               className="rounded-md border"
               width=""
               dir="raw"
@@ -83,19 +90,32 @@
 
           <div class="flex justify-end gap-3">
             <Button
+              disabled={unwrappedLockedEntries.has(unwrappedDialogEntry.key)}
               on:click={() => {
-                if (!hoverEntry?.fields.doi?.length) return
-                window.location.href = `https://doi.org/${hoverEntry.fields.doi}`
+                lockedEntries.update((entries) => {
+                  if (unwrappedDialogEntry) {
+                    entries.add(unwrappedDialogEntry.key)
+                  }
+                  return entries
+                })
+              }}
+            >
+              Add to Collection
+            </Button>
+            <Button
+              on:click={() => {
+                if (!unwrappedDialogEntry?.fields.doi?.length) return
+                window.location.href = `https://doi.org/${unwrappedDialogEntry.fields.doi}`
               }}
             >
               Visit Page
             </Button>
             <Button
               on:click={() => {
-                if (!hoverEntry) return
-                navigator.clipboard.writeText(hoverEntry.input)
+                if (!unwrappedDialogEntry) return
+                navigator.clipboard.writeText(unwrappedDialogEntry.input)
                 toast.success('BibTex has been copied', {
-                  description: hoverEntry.fields.title,
+                  description: unwrappedDialogEntry.fields.title,
                 })
               }}
             >

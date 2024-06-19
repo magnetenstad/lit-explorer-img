@@ -191,7 +191,7 @@
   })
 </script>
 
-<Tabs.Root value="table">
+<Tabs.Root value="table" let:value>
   <div class="flex justify-between gap-4 items-center py-4">
     <Input
       class="max-w-sm"
@@ -199,13 +199,20 @@
       type="text"
       bind:value={$filterValue}
     />
+
     <Tabs.List>
       <Tabs.Trigger value="table">Table</Tabs.Trigger>
       <Tabs.Trigger value="image-grid">Image Grid</Tabs.Trigger>
     </Tabs.List>
+
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild let:builder>
-        <Button variant="outline" class="ml-auto" builders={[builder]}>
+        <Button
+          variant="outline"
+          class="ml-auto"
+          builders={[builder]}
+          disabled={value != 'table'}
+        >
           Columns <ChevronDown class="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenu.Trigger>
@@ -223,6 +230,8 @@
 
   {#if unwrappedLockedEntries.length}
     <div class="flex flex-wrap gap-1">
+      <Button>Export</Button>
+
       {#each unwrappedLockedEntries as lockedEntry}
         <Button
           variant="secondary"
