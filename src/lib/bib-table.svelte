@@ -15,19 +15,21 @@
   } from 'svelte-headless-table'
   import {
     addHiddenColumns,
+    addSelectedRows,
     addSortBy,
     addTableFilter,
   } from 'svelte-headless-table/plugins'
-  import { type Readable } from 'svelte/store'
+  import { get, type Readable } from 'svelte/store'
   import { parseCategories } from './bib'
-  import { dialogEntry } from './bib-store'
+  import { allBibEntries, dialogEntry, lockedEntries } from './bib-store'
   import BibTableActions from './bib-table-actions.svelte'
+  import BibTableCheckbox from './bib-table-checkbox.svelte'
   import BibTableImg from './bib-table-img.svelte'
   import { Button } from './components/ui/button'
 
   export let bibEntries: Readable<Entry[]>
   let unwrappedBibEntries: Entry[] = []
-  bibEntries.subscribe((entries) => {
+  const unsubBibEntries = bibEntries.subscribe((entries) => {
     unwrappedBibEntries = entries
   })
 
@@ -51,8 +53,46 @@
         value.toLowerCase().includes(filterValue.toLowerCase()),
     }),
     hide: addHiddenColumns(),
+    select: addSelectedRows(),
   })
+
   const columns = table.createColumns([
+    table.column({
+      accessor: (fields) => fields.key,
+      header: 'Lock',
+      // header: (_, { pluginStates }) => {
+      //   const { allPageRowsSelected } = pluginStates.select
+      //   return createRender(BibTableCheckbox, {
+      //     checked: allPageRowsSelected,
+      //   })
+      // },
+      cell: ({ row }) => {
+        return createRender(BibTableCheckbox, {
+          onClick: () => {
+            lockedEntries.update((entries) => {
+              if (
+                'original' in row &&
+                typeof row.original == 'object' &&
+                row.original &&
+                'key' in row.original &&
+                typeof row.original.key == 'string'
+              ) {
+                entries.add(row.original.key)
+              }
+              return entries
+            })
+          },
+        })
+      },
+      plugins: {
+        sort: {
+          disable: true,
+        },
+        filter: {
+          exclude: true,
+        },
+      },
+    }),
     table.column({
       accessor: (fields) => fields.key,
       header: 'Image',
@@ -136,9 +176,19 @@
 
   const hidableCols = ['Image', 'Author', 'Date', 'Name', 'Categories', 'Doi']
 
-  let numEntries = 0
-  const unsubscribe = bibEntries.subscribe((e) => (numEntries = e.length))
-  onDestroy(unsubscribe)
+  $: numEntries = unwrappedBibEntries.length
+  let unwrappedLockedEntries: Entry[] = []
+  const unsubLockedEntries = lockedEntries.subscribe(
+    (entries) =>
+      (unwrappedLockedEntries = [...entries]
+        .map((key) => get(allBibEntries).find((e) => e.key == key))
+        .filter((e) => !!e) as unknown as Entry[])
+  )
+
+  onDestroy(() => {
+    unsubBibEntries()
+    unsubLockedEntries()
+  })
 </script>
 
 <Tabs.Root value="table">
@@ -170,6 +220,22 @@
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   </div>
+
+  {#if unwrappedLockedEntries.length}
+    <div class="flex flex-wrap gap-1">
+      {#each unwrappedLockedEntries as lockedEntry}
+        <Button
+          variant="secondary"
+          on:click={() => {
+            lockedEntries.update((entries) => {
+              entries.delete(lockedEntry.key)
+              return entries
+            })
+          }}>{lockedEntry.key}</Button
+        >
+      {/each}
+    </div>
+  {/if}
 
   <Tabs.Content value="table">
     <div class="h-[90svh] overflow-auto rounded-md border">
@@ -205,17 +271,25 @@
           <Table.Body {...$tableBodyAttrs}>
             {#each $pageRows as row (row.id)}
               <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-                <Table.Row
-                  {...rowAttrs}
-                  on:click={() => {
-                    dialogEntry.set(unwrappedBibEntries.at(parseInt(row.id)))
-                  }}
-                  class="cursor-pointer"
-                >
+                <Table.Row {...rowAttrs}>
                   {#each row.cells as cell (cell.id)}
                     <Subscribe attrs={cell.attrs()} let:attrs>
                       <Table.Cell {...attrs}>
-                        <Render of={cell.render()} />
+                        {#if cell.id != 'Lock'}
+                          <!-- svelte-ignore a11y-no-static-element-interactions a11y-click-events-have-key-events -->
+                          <span
+                            on:click={() => {
+                              dialogEntry.set(
+                                unwrappedBibEntries.at(parseInt(row.id))
+                              )
+                            }}
+                            class="cursor-pointer"
+                          >
+                            <Render of={cell.render()} />
+                          </span>
+                        {:else}
+                          <Render of={cell.render()} />
+                        {/if}
                       </Table.Cell>
                     </Subscribe>
                   {/each}

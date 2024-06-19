@@ -13,6 +13,7 @@ export const setVisFilter = writable(new Set<string>())
 export const yearFilter = writable(new Set<number>())
 export const authorFilter = writable(new Set<string>())
 export const nameFilter = writable(new Set<string>())
+export const lockedEntries = writable(new Set<string>())
 
 export const dialogEntry = writable<Entry | undefined>(undefined)
 
@@ -21,6 +22,7 @@ export enum Filter {
   SetVis,
   Author,
   Name,
+  Lock,
 }
 
 const filterByYear = (entries: Entry[]) => {
@@ -63,6 +65,14 @@ const filterByName = (entries: Entry[]) => {
   return entries
 }
 
+const filterByLocked = (entries: Entry[]) => {
+  const unwrappedLockedFilter = get(lockedEntries)
+  if (unwrappedLockedFilter.size) {
+    entries = entries.filter((e) => !unwrappedLockedFilter.has(e.key))
+  }
+  return entries
+}
+
 const filterAll = (entries: Entry[], except?: Filter) => {
   if (except != Filter.Year) {
     entries = filterByYear(entries)
@@ -81,7 +91,7 @@ const filterAll = (entries: Entry[], except?: Filter) => {
 
 const updateSets = (except?: Filter) => {
   const entries = get(allBibEntries)
-  dataTableEntries.set(filterAll(entries))
+  dataTableEntries.set(filterAll(filterByLocked(entries)))
 
   if (except != Filter.Year) {
     timelineEntries.set(filterAll(entries, Filter.Year))
@@ -111,6 +121,10 @@ authorFilter.subscribe(() => {
 })
 nameFilter.subscribe(() => {
   updateSets(Filter.Name)
+})
+lockedEntries.subscribe(() => {
+  const entries = get(allBibEntries)
+  dataTableEntries.set(filterAll(filterByLocked(entries)))
 })
 
 export const authorToString = (author: Creator) => {
