@@ -1,5 +1,6 @@
 <script lang="ts">
   import Authors from '$lib/authors.svelte'
+  import BibDialog from '$lib/bib-dialog.svelte'
   import {
     allBibEntries,
     authorEntries,
@@ -58,6 +59,7 @@
 
 <main>
   <Toaster />
+  <BibDialog />
   {#if bib}
     <Resizable.PaneGroup direction="horizontal" class="h-[100svh]">
       <Resizable.Pane>

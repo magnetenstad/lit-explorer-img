@@ -14,6 +14,8 @@ export const yearFilter = writable(new Set<number>())
 export const authorFilter = writable(new Set<string>())
 export const nameFilter = writable(new Set<string>())
 
+export const dialogEntry = writable<Entry | undefined>(undefined)
+
 export enum Filter {
   Year,
   SetVis,

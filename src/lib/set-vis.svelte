@@ -63,30 +63,38 @@
         (Math.random() - 0.5) * width,
         (Math.random() - 0.5) * height
       )
-      return new BibSet(start.x, start.y, category, new Vec2(0, 0)).activate(
+      return new BibSet(start.x, start.y, category, new Vec2(-100, 0)).activate(
         game
       )
     })
     const connections: [BibNode, BibNode][] = []
     let hoverSet: BibSet | null = null
+    let hoverNode: BibNode | null = null
 
     center.onMousePress = (ev) => {
-      if (ev.button == MouseButton.Left && hoverSet) {
-        if (selectedSets.has(hoverSet)) {
-          selectedSets.delete(hoverSet)
-        } else {
-          selectedSets.add(hoverSet)
+      if (ev.button == MouseButton.Left) {
+        if (hoverNode) {
+          return
         }
-        selectedSets = selectedSets
-        setVisFilter.set(
-          selectedSets.size
-            ? new Set(
-                [...selectedSets]
-                  .flatMap((set) => set.nodes)
-                  .map((node) => node.key)
-              )
-            : new Set()
-        )
+
+        if (hoverSet) {
+          if (selectedSets.has(hoverSet)) {
+            selectedSets.delete(hoverSet)
+          } else {
+            selectedSets.add(hoverSet)
+          }
+          selectedSets = selectedSets
+          setVisFilter.set(
+            selectedSets.size
+              ? new Set(
+                  [...selectedSets]
+                    .flatMap((set) => set.nodes)
+                    .map((node) => node.key)
+                )
+              : new Set()
+          )
+          return
+        }
       }
     }
 
