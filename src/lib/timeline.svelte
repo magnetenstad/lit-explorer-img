@@ -78,7 +78,7 @@
   }
 
   $: years = extractYears(bibEntries)
-  $: maxEntriesPerYear = Math.max(...years.map((x) => x[1]))
+  $: maxEntriesInAYear = Math.max(...years.map((x) => x[1]))
   $: yearColors = getYearColors(
     years,
     hoverYear,
@@ -138,7 +138,7 @@
       >
         <div
           class="absolute bottom-0"
-          style={`height: ${(100 * entries) / maxEntriesPerYear}px; width: 100%; background-color: ${yearColors.get(year)}; border-left: 1px solid ${slate400};`}
+          style={`height: ${(100 * entries) / maxEntriesInAYear}px; width: 100%; background-color: ${yearColors.get(year)}; border-left: 1px solid ${slate400};`}
         ></div>
         {#if year == hoverYear}
           <div class="absolute top-0 right-0">

@@ -28,13 +28,17 @@ export enum Filter {
 const filterByYear = (entries: Entry[]) => {
   const unwrappedYearFilter = get(yearFilter)
   if (unwrappedYearFilter.size) {
-    entries = entries.filter((e) => {
+    const filteredEntries = entries.filter((e) => {
       const year = getEntryYear(e)
       if (!year) {
         return false
       }
       return unwrappedYearFilter.has(year)
     })
+
+    if (filteredEntries.length) {
+      return filteredEntries
+    }
   }
   return entries
 }
