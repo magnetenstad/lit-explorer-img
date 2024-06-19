@@ -1,5 +1,6 @@
 <script lang="ts">
   import { type Entry } from '@retorquere/bibtex-parser'
+  import X from 'lucide-svelte/icons/x'
   import { onMount } from 'svelte'
   import { get } from 'svelte/store'
   import {
@@ -252,7 +253,7 @@
           selectedSets.clear()
           setVisFilter.set(new Set())
           selectedSets = selectedSets
-        }}>Clear</Button
+        }}><X size="20" />Clear Categories</Button
       >
     </div>
   {/if}

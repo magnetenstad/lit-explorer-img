@@ -4,6 +4,7 @@
   import * as ToggleGroup from '$lib/components/ui/toggle-group/index.js'
   import { type Entry } from '@retorquere/bibtex-parser'
   import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down'
+  import X from 'lucide-svelte/icons/x'
   import { onDestroy } from 'svelte'
   import { authorFilter, authorToString } from './bib-store'
 
@@ -42,7 +43,7 @@
       variant="outline"
       on:click={() => {
         authorFilter.set(new Set())
-      }}>Clear</Button
+      }}><X size="20" />Clear Authors</Button
     >
   {/if}
   <ToggleGroup.Root

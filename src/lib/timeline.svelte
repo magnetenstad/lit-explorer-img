@@ -1,5 +1,6 @@
 <script lang="ts">
   import { type Entry } from '@retorquere/bibtex-parser'
+  import X from 'lucide-svelte/icons/x'
   import { getEntryYear, yearFilter } from './bib-store'
   import { red500, slate200, slate400 } from './colors'
   import Button from './components/ui/button/button.svelte'
@@ -96,7 +97,7 @@
         selectedYears.clear()
         yearFilter.set(new Set())
         selectedYears = selectedYears
-      }}>Clear</Button
+      }}><X size="20" />Clear Timeline</Button
     >
   {/if}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
