@@ -59,13 +59,18 @@
   const columns = table.createColumns([
     table.column({
       accessor: (fields) => fields.key,
-      header: 'Lock',
-      // header: (_, { pluginStates }) => {
-      //   const { allPageRowsSelected } = pluginStates.select
-      //   return createRender(BibTableCheckbox, {
-      //     checked: allPageRowsSelected,
-      //   })
-      // },
+      header: () => {
+        return createRender(BibTableCheckbox, {
+          onClick: () => {
+            lockedEntries.update((entries) => {
+              unwrappedBibEntries.forEach((e) => {
+                entries.add(e.key)
+              })
+              return entries
+            })
+          },
+        })
+      },
       cell: ({ row }) => {
         return createRender(BibTableCheckbox, {
           onClick: () => {
@@ -231,6 +236,11 @@
   {#if unwrappedLockedEntries.length}
     <div class="flex flex-wrap gap-1">
       <Button>Export</Button>
+      <Button
+        on:click={() => {
+          lockedEntries.set(new Set())
+        }}>Clear</Button
+      >
 
       {#each unwrappedLockedEntries as lockedEntry}
         <Button
@@ -284,7 +294,7 @@
                   {#each row.cells as cell (cell.id)}
                     <Subscribe attrs={cell.attrs()} let:attrs>
                       <Table.Cell {...attrs}>
-                        {#if cell.id != 'Lock'}
+                        {#if cell != row.cells[0]}
                           <!-- svelte-ignore a11y-no-static-element-interactions a11y-click-events-have-key-events -->
                           <span
                             on:click={() => {
