@@ -60,8 +60,8 @@
         >
       </Dialog.Header>
 
-      <div class="flex gap-3 items-start">
-        <div class="flex-1 prose max-h-[80svh] overflow-auto">
+      <div class="flex gap-3 justify-between items-start">
+        <div class="flex-1 max-h-[80svh] overflow-auto">
           <p>
             {parseCategories(unwrappedDialogEntry).join(', ')}, {unwrappedDialogEntry
               .fields.date ?? ''}
@@ -69,26 +69,42 @@
           <p>
             {unwrappedDialogEntry.fields.abstract ?? ''}
           </p>
-          <details>
-            <summary>
+          <hr class="m-3" />
+          <div class="flex justify-end gap-3">
+            <Button
+              class="mx-3"
+              on:click={() => {
+                if (!unwrappedDialogEntry) return
+                navigator.clipboard.writeText(unwrappedDialogEntry.input)
+                toast.success('BibTex has been copied', {
+                  description: unwrappedDialogEntry.fields.title,
+                })
+              }}
+            >
+              Copy BibTex
+            </Button>
+          </div>
+          <details open>
+            <summary class="prose">
               <h4>BibTex</h4>
             </summary>
+
             <pre
               style="white-space: pre; overflow-x: hidden;">{unwrappedDialogEntry.input}</pre>
           </details>
         </div>
 
-        <div class="flex-1 max-h-[80svh] flex flex-col justify-between gap-3">
-          <div class="overflow-auto">
+        <div class="flex-1 flex flex-col justify-between gap-3">
+          <div class="h-[70svh] overflow-auto">
             <BibTableImg
               bibKey={unwrappedDialogEntry.key}
               className="rounded-md border"
-              width=""
               dir="raw"
+              width="100%"
             ></BibTableImg>
           </div>
 
-          <div class="flex justify-end gap-3">
+          <div class="flex justify-end align-center gap-3">
             <Button
               disabled={unwrappedLockedEntries.has(unwrappedDialogEntry.key)}
               on:click={() => {
@@ -100,7 +116,7 @@
                 })
               }}
             >
-              Add to Collection
+              Add to Portfolio
             </Button>
             <Button
               on:click={() => {
@@ -109,17 +125,6 @@
               }}
             >
               Visit Page
-            </Button>
-            <Button
-              on:click={() => {
-                if (!unwrappedDialogEntry) return
-                navigator.clipboard.writeText(unwrappedDialogEntry.input)
-                toast.success('BibTex has been copied', {
-                  description: unwrappedDialogEntry.fields.title,
-                })
-              }}
-            >
-              Copy BibTex
             </Button>
           </div>
         </div>

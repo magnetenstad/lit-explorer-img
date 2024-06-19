@@ -208,7 +208,7 @@
   <div class="flex justify-between gap-4 items-center py-4">
     <Input
       class="max-w-sm"
-      placeholder={`Search in ${numEntries} publications`}
+      placeholder={`Search in ${numEntries} items`}
       type="text"
       bind:value={$filterValue}
     />
@@ -217,6 +217,8 @@
       <Tabs.Trigger value="table">Table</Tabs.Trigger>
       <Tabs.Trigger value="image-grid">Image Grid</Tabs.Trigger>
     </Tabs.List>
+
+    <span>{numEntries}/{get(allBibEntries).length} items</span>
 
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild let:builder>
@@ -242,6 +244,7 @@
   </div>
 
   {#if unwrappedLockedEntries.length}
+    <h2>Portfolio</h2>
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="flex flex-wrap gap-1" on:mousemove={handleMousemove}>
       <Button>Export</Button>
