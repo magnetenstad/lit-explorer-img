@@ -225,10 +225,10 @@
       }
     }
 
-    // for (let i = 0; i < 60 * 5; i++) {
-    //   // @ts-ignore
-    //   game.__step()
-    // }
+    for (let i = 0; i < 60 * 5; i++) {
+      // @ts-ignore
+      game.__step()
+    }
 
     game.play()
   })
