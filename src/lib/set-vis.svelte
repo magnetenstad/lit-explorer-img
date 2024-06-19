@@ -260,7 +260,10 @@
 
   {#if hoverNode}
     <div class="absolute" style={`top: ${m.y}px; left: ${m.x}px;`}>
-      <BibTableImg bibKey={hoverNode.key} className="rounded-md border"
+      <BibTableImg
+        bibKey={hoverNode.key}
+        className="rounded-md border"
+        width="150"
       ></BibTableImg>
       <p class="bg-white">
         {allBibEntries

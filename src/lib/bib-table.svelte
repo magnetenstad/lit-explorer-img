@@ -194,6 +194,14 @@
     unsubBibEntries()
     unsubLockedEntries()
   })
+
+  let hoverLockedEntryKey = null as string | null
+  let m = { x: 0, y: 0 }
+
+  function handleMousemove(event: MouseEvent) {
+    m.x = event.clientX
+    m.y = event.clientY
+  }
 </script>
 
 <Tabs.Root value="table" let:value>
@@ -234,7 +242,8 @@
   </div>
 
   {#if unwrappedLockedEntries.length}
-    <div class="flex flex-wrap gap-1">
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="flex flex-wrap gap-1" on:mousemove={handleMousemove}>
       <Button>Export</Button>
       <Button
         on:click={() => {
@@ -243,15 +252,29 @@
       >
 
       {#each unwrappedLockedEntries as lockedEntry}
-        <Button
-          variant="secondary"
-          on:click={() => {
-            lockedEntries.update((entries) => {
-              entries.delete(lockedEntry.key)
-              return entries
-            })
-          }}>{lockedEntry.key}</Button
+        <div
+          on:mouseenter={() => {
+            hoverLockedEntryKey = lockedEntry.key
+          }}
+          on:mouseleave={() => {
+            if (hoverLockedEntryKey == lockedEntry.key) {
+              hoverLockedEntryKey = null
+            }
+          }}
         >
+          <Button
+            variant="secondary"
+            on:click={() => {
+              lockedEntries.update((entries) => {
+                entries.delete(lockedEntry.key)
+                return entries
+              })
+              if (hoverLockedEntryKey == lockedEntry.key) {
+                hoverLockedEntryKey = null
+              }
+            }}>{lockedEntry.key}</Button
+          >
+        </div>
       {/each}
     </div>
   {/if}
@@ -335,4 +358,22 @@
       {/each}
     </div>
   </Tabs.Content>
+
+  {#if hoverLockedEntryKey}
+    <div
+      class="absolute"
+      style={`top: ${m.y}px; left: ${m.x}px; pointer-events: none;`}
+    >
+      <BibTableImg
+        bibKey={hoverLockedEntryKey}
+        className="rounded-md border"
+        width="150"
+      ></BibTableImg>
+      <p class="bg-white">
+        {get(allBibEntries)
+          .find((e) => e.key == hoverLockedEntryKey)
+          ?.fields.title?.slice(0, 32)}..
+      </p>
+    </div>
+  {/if}
 </Tabs.Root>
