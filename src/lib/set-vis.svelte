@@ -40,7 +40,7 @@
 
   onMount(() => {
     const width = 1600
-    const height = 750
+    const height = 640
     const game = new Game(gameDiv).setOptions({
       width,
       height,
@@ -67,7 +67,7 @@
         (Math.random() - 0.5) * width,
         (Math.random() - 0.5) * height
       )
-      return new BibSet(start.x, start.y, category, new Vec2(-100, 0)).activate(
+      return new BibSet(start.x, start.y, category, new Vec2(-160, 0)).activate(
         game
       )
     })
