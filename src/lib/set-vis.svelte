@@ -189,27 +189,23 @@
 
       if (!hoverNode && bibSets.length) {
         let minSet = bibSets[0]
-        let minDistance = minSet.pos.lengthTo(mouse)
+        let minDistance = minSet.getTitlePos().lengthTo(mouse)
         bibSets.forEach((node) => {
-          const distance = node.pos.lengthTo(mouse)
-          if (distance < minDistance) {
-            minDistance = distance
+          // const distance = node.pos.lengthTo(mouse)
+          // if (distance < minDistance) {
+          //   minDistance = distance
+          //   minSet = node
+          // }
+          const titleDistance = node.getTitlePos().lengthTo(mouse)
+          if (titleDistance < minDistance) {
+            minDistance = titleDistance
             minSet = node
           }
         })
 
-        if (minDistance < minSet.radius + 4) {
+        if (minDistance < 128) {
           hoverSet = minSet
         }
-      }
-
-      if (hoverSet) {
-        hoverSet.highlight = HightlightState.Hover
-        hoverSet.nodes.forEach((node) => {
-          if (activeBibNodes.includes(node)) {
-            highlightNode(node, HightlightState.Hover)
-          }
-        })
       }
 
       selectedSets.forEach((set) => {
@@ -220,6 +216,15 @@
           }
         })
       })
+
+      if (hoverSet) {
+        hoverSet.highlight = HightlightState.Hover
+        // hoverSet.nodes.forEach((node) => {
+        //   if (activeBibNodes.includes(node)) {
+        //     highlightNode(node, HightlightState.Hover)
+        //   }
+        // })
+      }
 
       if (hoverNode) {
         hoverNode.highlight = HightlightState.Hover

@@ -4,7 +4,7 @@ import {
   type DrawContext,
   type GameContext,
 } from 'web-game-engine'
-import { red500, red900, slate200, slate400, slate600 } from './colors'
+import { red500, red900, slate300, slate400, slate600 } from './colors'
 
 export enum HightlightState {
   None,
@@ -65,11 +65,11 @@ export class BibNode extends PositionObject {
   getColors() {
     switch (this.highlight) {
       case HightlightState.None:
-        return { fill: slate200, stroke: slate600 }
+        return { fill: slate300, stroke: slate600 }
       case HightlightState.Hover:
-        return { fill: slate400, stroke: slate600 }
-      case HightlightState.Selected:
         return { fill: red500, stroke: red900 }
+      case HightlightState.Selected:
+        return { fill: slate300, stroke: slate600 }
       case HightlightState.Inactive:
         return { fill: 'white', stroke: slate400 }
     }
@@ -149,34 +149,48 @@ export class BibSet extends PositionObject {
     })
   }
 
+  getColor() {
+    switch (this.highlight) {
+      case HightlightState.None:
+        return lineColor
+      case HightlightState.Hover:
+        return red500
+      case HightlightState.Selected:
+        return lineColor
+    }
+  }
+
   getLineWidth() {
     switch (this.highlight) {
       case HightlightState.None:
         return 1
       case HightlightState.Hover:
-        return 2
+        return 5
       case HightlightState.Selected:
-        return 3
+        return 5
     }
   }
 
+  getTitlePos() {
+    return this.pos
+      .moveTowards(new Vec2(0, 0), -(this.radius + 40))
+      .minus(new Vec2(10, 10))
+  }
   draw(ctx: DrawContext): void {
     ctx.canvas.drawCircle(this.radius, this.pos, {
       fillStyle: 'transparent',
-      strokeStyle: lineColor,
+      strokeStyle: this.getColor(),
       lineWidth: this.getLineWidth(),
     })
-    const pos = this.pos
-      .moveTowards(new Vec2(0, 0), -(this.radius + 40))
-      .minus(new Vec2(10, 10))
+    const pos = this.getTitlePos()
     ctx.canvas.drawLine(
       this.pos.moveTowards(pos, this.radius),
       pos,
       {},
-      { strokeStyle: lineColor }
+      { strokeStyle: this.getColor(), lineWidth: this.getLineWidth() }
     )
     ctx.canvas.drawText(this.title, pos, {
-      fillStyle: 'black',
+      fillStyle: this.getColor(),
       fontSize: 20,
     })
   }

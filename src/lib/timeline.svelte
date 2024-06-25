@@ -2,12 +2,13 @@
   import { type Entry } from '@retorquere/bibtex-parser'
   import X from 'lucide-svelte/icons/x'
   import { getEntryYear, yearFilter } from './bib-store'
-  import { red500, slate200, slate400 } from './colors'
+  import { red500, slate300, slate600 } from './colors'
   import Button from './components/ui/button/button.svelte'
 
+  export let allBibEntries: Entry[]
   export let bibEntries: Entry[]
 
-  const extractYears = (bibEntries: Entry[]) => {
+  const extractYears = (bibEntries: Entry[], addGap = false) => {
     const entriesPerYear = new Map<number, number>()
     bibEntries.forEach((entry) => {
       const year = getEntryYear(entry)
@@ -18,11 +19,13 @@
         entriesPerYear.set(year, 1)
       }
     })
-    ;[...entriesPerYear.keys()].forEach((year) => {
-      if (!entriesPerYear.has(year - 1)) {
-        entriesPerYear.set(year - 1, 0)
-      }
-    })
+    if (addGap) {
+      ;[...entriesPerYear.keys()].forEach((year) => {
+        if (!entriesPerYear.has(year - 1)) {
+          entriesPerYear.set(year - 1, 0)
+        }
+      })
+    }
     return [...entriesPerYear.entries()].toSorted((a, b) => a[0] - b[0])
   }
 
@@ -42,45 +45,48 @@
     yearFilter.set(selectedYears)
   }
 
-  const getYearColors = (
+  const getYearStyles = (
     years: [number, number][],
+    selectableYears: Set<number>,
     hoverYear: number | null,
     startSelectYear: number | null,
     endSelectYear: number | null,
     selectedYears: Set<number>
   ) => {
-    const getColor = (year: number) => {
-      if (
-        startSelectYear &&
-        endSelectYear &&
-        Math.min(startSelectYear, endSelectYear) <= year &&
-        year <= Math.max(startSelectYear, endSelectYear)
-      ) {
-        return slate400
-      }
-      if (selectedYears.has(year)) {
-        return red500
-      }
-      if (year == hoverYear) {
-        return slate400
-      }
-      return slate200
+    const getStyle = (year: number) => {
+      const fill = selectableYears.has(year) ? slate300 : 'white'
+      const isHovered =
+        year == hoverYear ||
+        (startSelectYear &&
+          endSelectYear &&
+          Math.min(startSelectYear, endSelectYear) <= year &&
+          year <= Math.max(startSelectYear, endSelectYear))
+      const stroke = isHovered ? red500 : slate600
+      const strokeWidth = selectedYears.has(year) || isHovered ? '2px' : '1px'
+      return { fill, stroke, strokeWidth }
     }
-    const yearColors = new Map<number, string>()
+    const yearStyles = new Map<
+      number,
+      { fill: string; stroke: string; strokeWidth: string }
+    >()
     years.forEach(([year, _]) => {
-      yearColors.set(year, getColor(year))
+      yearStyles.set(year, getStyle(year))
     })
-    return yearColors
+    return yearStyles
   }
 
   function numberRange(start: number, end: number) {
     return new Array(end - start).fill(0).map((_, i) => i + start)
   }
 
-  $: years = extractYears(bibEntries)
+  $: years = extractYears(allBibEntries, true)
+  $: selectableYears = new Set(
+    extractYears(bibEntries, false).map(([a, b]) => a)
+  )
   $: maxEntriesInAYear = Math.max(...years.map((x) => x[1]))
-  $: yearColors = getYearColors(
+  $: yearStyles = getYearStyles(
     years,
+    selectableYears,
     hoverYear,
     startSelectYear,
     endSelectYear,
@@ -137,12 +143,12 @@
         on:focus={() => (hoverYear = year)}
       >
         <div
-          class="absolute bottom-0"
-          style={`height: ${(100 * entries) / maxEntriesInAYear}px; width: 100%; background-color: ${yearColors.get(year)}; border-left: 1px solid ${slate400};`}
+          class="absolute bottom-0 w-[100%] rounded-t"
+          style={`height: ${(100 * entries) / maxEntriesInAYear}px; background-color: ${yearStyles.get(year)?.fill}; outline: ${entries == 0 ? 'undefined' : `${yearStyles.get(year)?.strokeWidth} solid ${yearStyles.get(year)?.stroke}`}`}
         ></div>
         {#if year == hoverYear}
           <div class="absolute top-0 right-0">
-            <span>{year}</span>
+            <span style={`color: ${red500}`}>{year}</span>
           </div>
         {/if}
       </button>

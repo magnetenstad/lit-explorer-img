@@ -73,7 +73,10 @@
           <span class="prose">
             <h3>Timeline</h3>
           </span>
-          <Timeline bibEntries={unwrappedTimelineEntries}></Timeline>
+          <Timeline
+            bibEntries={unwrappedTimelineEntries}
+            allBibEntries={unwrappedAllEntries}
+          ></Timeline>
 
           <span class="prose my-5">
             <h3>Categories</h3>
