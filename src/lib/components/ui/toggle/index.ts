@@ -2,7 +2,7 @@ import { tv, type VariantProps } from "tailwind-variants";
 import Root from "./toggle.svelte";
 
 export const toggleVariants = tv({
-	base: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground data-[state=on]:outline data-[state=on]:outline-2 data-[state=on]:outline-slate-600 hover:outline hover:outline-2 hover:outline-red-500",
+	base: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:outline hover:outline-3 hover:outline-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground data-[state=on]:outline data-[state=on]:outline-3 data-[state=on]:outline-slate-600",
 	variants: {
 		variant: {
 			default: "bg-transparent",

@@ -62,7 +62,7 @@
           Math.min(startSelectYear, endSelectYear) <= year &&
           year <= Math.max(startSelectYear, endSelectYear))
       const stroke = isHovered ? red500 : slate600
-      const strokeWidth = selectedYears.has(year) || isHovered ? '2px' : '1px'
+      const strokeWidth = selectedYears.has(year) || isHovered ? '3px' : '1px'
       return { fill, stroke, strokeWidth }
     }
     const yearStyles = new Map<
@@ -80,9 +80,7 @@
   }
 
   $: years = extractYears(allBibEntries, true)
-  $: selectableYears = new Set(
-    extractYears(bibEntries, false).map(([a, b]) => a)
-  )
+  $: selectableYears = new Set(extractYears(bibEntries, false).map(([a]) => a))
   $: maxEntriesInAYear = Math.max(...years.map((x) => x[1]))
   $: yearStyles = getYearStyles(
     years,
