@@ -1,6 +1,6 @@
 # LitExplorer: A Visual Browser for Literature Collections
 
-![image](https://github.com/info-vis-24/lit-explorer/assets/46494695/a6e9af41-078f-447a-8378-54d69af3fcc6)
+![image](https://github.com/info-vis-24/lit-explorer/assets/46494695/72a76813-9959-492b-b1e4-ac695e773d1d)
 
 ## How it Works
 
