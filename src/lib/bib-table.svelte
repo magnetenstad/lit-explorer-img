@@ -202,6 +202,24 @@
     m.x = event.clientX
     m.y = event.clientY
   }
+
+  function exportBib(entries: Entry[]) {
+    let text = ''
+    entries.forEach((entry) => {
+      text += entry.input + '\n\n'
+    })
+
+    const element = document.createElement('a')
+    element.setAttribute(
+      'href',
+      'data:text/plain;charset=utf-8,' + encodeURIComponent(text)
+    )
+    element.setAttribute('download', 'portfolio.bib')
+    element.style.display = 'none'
+    document.body.appendChild(element)
+    element.click()
+    document.body.removeChild(element)
+  }
 </script>
 
 <Tabs.Root value="table" let:value>
@@ -247,7 +265,7 @@
     <h2>Portfolio</h2>
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="flex flex-wrap gap-1" on:mousemove={handleMousemove}>
-      <Button>Export</Button>
+      <Button on:click={() => exportBib(unwrappedLockedEntries)}>Export</Button>
       <Button
         on:click={() => {
           lockedEntries.set(new Set())
